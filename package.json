@@ -1,0 +1,10 @@
+{
+  "name": "recibo-system",
+  "version": "1.0.0",
+  "description": "Sistema de Recibos de Pagamento",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

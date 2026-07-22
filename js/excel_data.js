@@ -1,0 +1,951 @@
+// Arquivo gerado automaticamente para importação estática do Excel
+export const EXCEL_RECEIPTS = [
+  {
+    "id": "",
+    "funcionario_nome": "DEBORA ROSA SABIN DA SILVA DINO",
+    "competencia": "02/2026",
+    "periodo": "01/02/2026 à 28/02/2026",
+    "data_emissao": "2026-02-28",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/02/2026 à 28/02/2026",
+        "valor": 2900.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 7.41,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 152.73,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTAS",
+        "valor": 65.14,
+        "recorrente": true
+      },
+      {
+        "descricao": "VALE",
+        "valor": 580.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência FEVEREIRO 2026.",
+    "valor_liquido": 2109.54
+  },
+  {
+    "id": "",
+    "funcionario_nome": "JOÃO PEDRO LEAL",
+    "competencia": "02/2026",
+    "periodo": "01/02/2026 à 28/02/2026",
+    "data_emissao": "2026-02-28",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/02/2026 à 28/02/2026",
+        "valor": 1621.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "PRODUÇÃO",
+        "valor": 25.12,
+        "recorrente": true
+      },
+      {
+        "descricao": "CESTA",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORA EXT",
+        "valor": 32.23,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 124.34,
+        "recorrente": true
+      },
+      {
+        "descricao": "VALE",
+        "valor": 470.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTAS",
+        "valor": 1.49,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 24.9,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência FEVEREIRO 2026.",
+    "valor_liquido": 1057.62
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KAYKY FELIPE DE OLIVEIRA VERDUM",
+    "competencia": "02/2026",
+    "periodo": "01/02/2026 à 28/02/2026",
+    "data_emissao": "2026-02-28",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/02/2026 à 28/02/2026",
+        "valor": 2000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 340.77,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 17.92,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 122.34,
+        "recorrente": true
+      },
+      {
+        "descricao": "HRS FALTA",
+        "valor": 9.36,
+        "recorrente": true
+      },
+      {
+        "descricao": "vale",
+        "valor": 750.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência FEVEREIRO 2026.",
+    "valor_liquido": 1476.99
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KEVIN EDUARDO",
+    "competencia": "02/2026",
+    "periodo": "01/02/2026 à 28/02/2026",
+    "data_emissao": "2026-02-28",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/02/2026 à 28/02/2026",
+        "valor": 1621.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 0.0,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "vale",
+        "valor": 550.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência FEVEREIRO 2026.",
+    "valor_liquido": 1071.0
+  },
+  {
+    "id": "",
+    "funcionario_nome": "THIAGO CEZAR DE SOUZA",
+    "competencia": "02/2026",
+    "periodo": "01/02/2026 à 28/02/2026",
+    "data_emissao": "2026-02-28",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/02/2026 à 28/02/2026",
+        "valor": 4000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 953.64,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora Extra",
+        "valor": 150.77,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 223.24,
+        "recorrente": true
+      },
+      {
+        "descricao": "CARTÃO + 500,00 04X06 R$ 383,33",
+        "valor": 383.33,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 221.8,
+        "recorrente": true
+      },
+      {
+        "descricao": "CREATINA",
+        "valor": 49.9,
+        "recorrente": true
+      },
+      {
+        "descricao": "ADIANTAMENTO",
+        "valor": 2000.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência FEVEREIRO 2026.",
+    "valor_liquido": 2226.14
+  },
+  {
+    "id": "",
+    "funcionario_nome": "DEBORA ROSA SABIN DA SILVA DINO",
+    "competencia": "03/2026",
+    "periodo": "01/03/2026 à 31/03/2026",
+    "data_emissao": "2026-03-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/03/2026 à 31/03/2026",
+        "valor": 2900.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 34.41,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 154.75,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTAS",
+        "valor": 69.68,
+        "recorrente": true
+      },
+      {
+        "descricao": "VALE",
+        "valor": 580.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MARÇO 2026.",
+    "valor_liquido": 2129.98
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KAYKY FELIPE DE OLIVEIRA VERDUM",
+    "competencia": "03/2026",
+    "periodo": "01/03/2026 à 31/03/2026",
+    "data_emissao": "2026-03-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/03/2026 à 31/03/2026",
+        "valor": 2000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 335.51,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 31.49,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 123.52,
+        "recorrente": true
+      },
+      {
+        "descricao": "HRS FALTA",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "vale",
+        "valor": 750.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MARÇO 2026.",
+    "valor_liquido": 1493.48
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KEVIN EDUARDO",
+    "competencia": "03/2026",
+    "periodo": "01/03/2026 à 31/03/2026",
+    "data_emissao": "2026-03-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/03/2026 à 31/03/2026",
+        "valor": 1621.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 18.42,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "vale",
+        "valor": 500.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MARÇO 2026.",
+    "valor_liquido": 1139.42
+  },
+  {
+    "id": "",
+    "funcionario_nome": "THIAGO CEZAR DE SOUZA",
+    "competencia": "03/2026",
+    "periodo": "01/03/2026 à 31/03/2026",
+    "data_emissao": "2026-03-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/03/2026 à 31/03/2026",
+        "valor": 4000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 668.72,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora Extra",
+        "valor": 274.07,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 229.34,
+        "recorrente": true
+      },
+      {
+        "descricao": "CARTÃO + 500,00 04X06 R$ 383,33 (pausado p/ mes 06)",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 244.1,
+        "recorrente": true
+      },
+      {
+        "descricao": "CREATINA",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "ADIANTAMENTO",
+        "valor": 2350.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MARÇO 2026.",
+    "valor_liquido": 2119.35
+  },
+  {
+    "id": "",
+    "funcionario_nome": "DEBORA ROSA SABIN DA SILVA DINO",
+    "competencia": "04/2026",
+    "periodo": "01/04/2026 à 30/04/2026",
+    "data_emissao": "2026-04-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/04/2026 à 30/04/2026",
+        "valor": 2900.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "1/3 FÉRIAS",
+        "valor": 842.72,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 26.0,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS293,09 Férias + 27,86",
+        "valor": 320.95,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTAS",
+        "valor": 71.14,
+        "recorrente": true
+      },
+      {
+        "descricao": "VALE",
+        "valor": 580.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência ABRIL 2026.",
+    "valor_liquido": 2796.63
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KAYKY FELIPE DE OLIVEIRA VERDUM",
+    "competencia": "04/2026",
+    "periodo": "01/04/2026 à 30/04/2026",
+    "data_emissao": "2026-04-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/04/2026 à 30/04/2026",
+        "valor": 2000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 402.43,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 7.53,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 154.32,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 16.9,
+        "recorrente": true
+      },
+      {
+        "descricao": "HRS FALTA",
+        "valor": 22.55,
+        "recorrente": true
+      },
+      {
+        "descricao": "vale",
+        "valor": 800.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência ABRIL 2026.",
+    "valor_liquido": 1416.19
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KEVIN EDUARDO",
+    "competencia": "04/2026",
+    "periodo": "01/04/2026 à 30/04/2026",
+    "data_emissao": "2026-04-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/04/2026 à 30/04/2026",
+        "valor": 1621.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 15.0,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "vale",
+        "valor": 500.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "FALTAS4 DIAS R$54,03 CADA FALTA",
+        "valor": 216.13,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência ABRIL 2026.",
+    "valor_liquido": 919.87
+  },
+  {
+    "id": "",
+    "funcionario_nome": "THIAGO CEZAR DE SOUZA",
+    "competencia": "04/2026",
+    "periodo": "01/04/2026 à 30/04/2026",
+    "data_emissao": "2026-04-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/04/2026 à 30/04/2026",
+        "valor": 4000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 571.5,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora Extra7:00",
+        "valor": 127.27,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 222.21,
+        "recorrente": true
+      },
+      {
+        "descricao": "CARTÃO + 500,00 04X06 R$ 383,33 (pausado p/ mes 06)",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 363.4,
+        "recorrente": true
+      },
+      {
+        "descricao": "ADIANTAMENTO",
+        "valor": 2000.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência ABRIL 2026.",
+    "valor_liquido": 2113.16
+  },
+  {
+    "id": "",
+    "funcionario_nome": "DEBORA ROSA SABIN DA SILVA DINO",
+    "competencia": "05/2026",
+    "periodo": "01/05/2026 à 31/05/2026",
+    "data_emissao": "2026-05-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/05/2026 à 31/05/2026",
+        "valor": 2900.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 44.92,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "FARMACIA",
+        "valor": 34.9,
+        "recorrente": true
+      },
+      {
+        "descricao": "INSS+ 1,58 INSS DIFERENCIA",
+        "valor": 160.44,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTAS",
+        "valor": 92.84,
+        "recorrente": true
+      },
+      {
+        "descricao": "VALE",
+        "valor": 580.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MAIO 2026.",
+    "valor_liquido": 2076.74
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KAYKY FELIPE DE OLIVEIRA VERDUM",
+    "competencia": "05/2026",
+    "periodo": "01/05/2026 à 31/05/2026",
+    "data_emissao": "2026-05-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/05/2026 à 31/05/2026",
+        "valor": 2000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 270.23,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 74.46,
+        "recorrente": true
+      },
+      {
+        "descricao": "CESTA",
+        "valor": 300.0,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 158.96,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 16.9,
+        "recorrente": true
+      },
+      {
+        "descricao": "HRS FALTA",
+        "valor": 38.27,
+        "recorrente": true
+      },
+      {
+        "descricao": "vale",
+        "valor": 800.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MAIO 2026.",
+    "valor_liquido": 1630.56
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KEVIN EDUARDO",
+    "competencia": "05/2026",
+    "periodo": "01/05/2026 à 31/05/2026",
+    "data_emissao": "2026-05-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/05/2026 à 31/05/2026",
+        "valor": 1621.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "cesta",
+        "valor": 300.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 62.09,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "vale",
+        "valor": 500.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "INSS",
+        "valor": 127.05,
+        "recorrente": true
+      },
+      {
+        "descricao": "FALTAS",
+        "valor": 1.18,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MAIO 2026.",
+    "valor_liquido": 1354.86
+  },
+  {
+    "id": "",
+    "funcionario_nome": "THIAGO CEZAR DE SOUZA",
+    "competencia": "05/2026",
+    "periodo": "01/05/2026 à 31/05/2026",
+    "data_emissao": "2026-05-31",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/05/2026 à 31/05/2026",
+        "valor": 4000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 839.33,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora Extra15:19",
+        "valor": 340.81,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 240.65,
+        "recorrente": true
+      },
+      {
+        "descricao": "CARTÃO + 500,00 05X06 R$ 383,33",
+        "valor": 383.33,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 250.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "MER LIVRE PEÇAS CARRO 01 X 10  R$ 49,39 + R$ 76,50",
+        "valor": 125.89,
+        "recorrente": true
+      },
+      {
+        "descricao": "ADIANTAMENTO",
+        "valor": 2000.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência MAIO 2026.",
+    "valor_liquido": 2180.27
+  },
+  {
+    "id": "",
+    "funcionario_nome": "DEBORA ROSA SABIN DA SILVA DINO",
+    "competencia": "06/2026",
+    "periodo": "01/06/2026 à 30/06/2026",
+    "data_emissao": "2026-06-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/06/2026 à 30/06/2026",
+        "valor": 2900.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 46.22,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "FARMACIA",
+        "valor": 39.9,
+        "recorrente": true
+      },
+      {
+        "descricao": "INSS",
+        "valor": 197.24,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTAS JOGO BRASIL",
+        "valor": 41.25,
+        "recorrente": true
+      },
+      {
+        "descricao": "VALE",
+        "valor": 580.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência JUNHO 2026.",
+    "valor_liquido": 2087.83
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KAYKY FELIPE DE OLIVEIRA VERDUM",
+    "competencia": "06/2026",
+    "periodo": "01/06/2026 à 30/06/2026",
+    "data_emissao": "2026-06-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/06/2026 à 30/06/2026",
+        "valor": 2000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 412.12,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 101.64,
+        "recorrente": true
+      },
+      {
+        "descricao": "CESTA",
+        "valor": 300.0,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 162.14,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 0.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "HRS FALTA JOGO DO BRASIL + HORA FALTA3:35",
+        "valor": 30.45,
+        "recorrente": true
+      },
+      {
+        "descricao": "vale",
+        "valor": 850.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência JUNHO 2026.",
+    "valor_liquido": 1771.17
+  },
+  {
+    "id": "",
+    "funcionario_nome": "KEVIN EDUARDO",
+    "competencia": "06/2026",
+    "periodo": "01/06/2026 à 30/06/2026",
+    "data_emissao": "2026-06-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/06/2026 à 30/06/2026",
+        "valor": 1621.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "cesta",
+        "valor": 300.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora-Extra",
+        "valor": 52.15,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "vale",
+        "valor": 500.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "INSS",
+        "valor": 126.01,
+        "recorrente": true
+      },
+      {
+        "descricao": "FALTAS",
+        "valor": 2.8,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência JUNHO 2026.",
+    "valor_liquido": 1344.34
+  },
+  {
+    "id": "",
+    "funcionario_nome": "THIAGO CEZAR DE SOUZA",
+    "competencia": "06/2026",
+    "periodo": "01/06/2026 à 30/06/2026",
+    "data_emissao": "2026-06-30",
+    "vencimentos": [
+      {
+        "descricao": "Salário Base 01/06/2026 à 30/06/2026",
+        "valor": 4000.0,
+        "recorrente": true
+      },
+      {
+        "descricao": "Produção",
+        "valor": 706.47,
+        "recorrente": true
+      },
+      {
+        "descricao": "Hora Extra-",
+        "valor": 372.72,
+        "recorrente": true
+      }
+    ],
+    "descontos": [
+      {
+        "descricao": "INSS",
+        "valor": 246.63,
+        "recorrente": true
+      },
+      {
+        "descricao": "HORAS FALTA JOGO  2:56",
+        "valor": 54.54,
+        "recorrente": true
+      },
+      {
+        "descricao": "CARTÃO + 500,00 06X06 R$ 383,33",
+        "valor": 383.33,
+        "recorrente": true
+      },
+      {
+        "descricao": "FARMACIA",
+        "valor": 206.7,
+        "recorrente": true
+      },
+      {
+        "descricao": "MER LIVRE PEÇAS CARRO 02 X 10  R$ 49,39 + R$ 76,50",
+        "valor": 125.89,
+        "recorrente": true
+      },
+      {
+        "descricao": "ADIANTAMENTO",
+        "valor": 2000.0,
+        "recorrente": true
+      }
+    ],
+    "observacoes": "Importado da planilha Excel - Competência JUNHO 2026.",
+    "valor_liquido": 2062.1
+  }
+];

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Recibos de Pagamento</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- MENU LATERAL -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">R</div>
+                <div class="brand-text">
+                    <h1 id="sidebar-brand-name">ESTAMPARIA JL</h1>
+                    <span>Holerite Digital</span>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item active" data-view="dashboard">
+                    <a href="#dashboard">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="recibo">
+                    <a href="#recibo">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        <span>Novo Recibo</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="funcionarios">
+                    <a href="#funcionarios">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span>Funcionários</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="historico">
+                    <a href="#historico">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Histórico</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="ferias">
+                    <a href="#ferias">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>Férias</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="configuracoes">
+                    <a href="#configuracoes">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.5 1z"></path></svg>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <span>Versão 1.0.0</span>
+            </div>
+        </aside>
+        
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- Banner de Importação do Excel -->
+            <div id="import-excel-banner" style="display:none; margin-bottom: 20px;"></div>
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-panel active">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2>Painel Administrativo</h2>
+                        <p>Visão geral da folha de pagamento e funcionários</p>
+                    </div>
+                </header>
+                
+                <!-- Métricas -->
+                <div class="dashboard-metrics">
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h3>Funcionários</h3>
+                            <p id="dash-metric-employees">0</p>
+                        </div>
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h3>Folha Mensal (Líquida)</h3>
+                            <p id="dash-metric-payroll">R$ 0,00</p>
+                        </div>
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h3>Em Férias</h3>
+                            <p id="dash-metric-vacation">0</p>
+                        </div>
+                        <div class="metric-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Layout de Grids -->
+                <div class="dashboard-grid">
+                    <!-- Esquerda: Últimos Recibos -->
+                    <div class="dashboard-panel">
+                        <div class="panel-header">
+                            <h3>Últimos Recibos Emitidos</h3>
+                            <button class="btn btn-secondary btn-sm" id="dash-btn-view-history">Ver Histórico</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table" id="dash-table-receipts">
+                                <thead>
+                                    <tr>
+                                        <th>Funcionário</th>
+                                        <th>Competência</th>
+                                        <th>Data</th>
+                                        <th>Valor Líquido</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Direita: Avisos Importantes -->
+                    <div class="dashboard-panel">
+                        <div class="panel-header">
+                            <h3>Avisos Importantes</h3>
+                        </div>
+                        <div class="alerts-list" id="dash-alerts-container">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- VIEW: RECIBO EDITÁVEL -->
+            <section id="view-recibo" class="view-panel">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2>Editor de Recibo</h2>
+                        <p>Preencha os valores diretamente na própria folha</p>
+                    </div>
+                </header>
+                
+                <div class="recibo-editor-layout">
+                    <!-- Barra de Ferramentas -->
+                    <div class="editor-toolbar">
+                        <div class="employee-select-wrapper">
+                            <input type="text" class="employee-search-input" id="recibo-employee-search" placeholder="🔍 Pesquisar funcionário..." autocomplete="off">
+                            <div class="employee-dropdown" id="recibo-employee-dropdown"></div>
+                        </div>
+                        
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" id="recibo-btn-clear">Limpar</button>
+                            <button class="btn btn-secondary" id="recibo-btn-duplicate" style="display:none;">Duplicar Mês</button>
+                            <button class="btn btn-secondary" id="recibo-btn-print">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                Imprimir
+                            </button>
+                            <button class="btn btn-secondary" id="recibo-btn-pdf">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                PDF
+                            </button>
+                            <button class="btn btn-primary" id="recibo-btn-save">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                                Salvar Recibo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Espaço de Trabalho dos Recibos -->
+                    <div class="receipts-workspace" id="receipts-workspace-container">
+                        <div class="print-page" id="print-area">
+                            
+                            <!-- VIA 1 (Esquerda) -->
+                            <div class="receipt via-1" data-via="1">
+                                <div class="receipt-title">RECIBO</div>
+                                <div class="receipt-header-info">
+                                    <div class="info-line">
+                                        <span class="info-label">Empregador:</span>
+                                        <span class="info-val" data-field="empresa_nome" contenteditable="true">ESTAMPARIA JL LTDA - ME</span>
+                                    </div>
+                                    <div class="info-line">
+                                        <span class="info-label">CNPJ:</span>
+                                        <span class="info-val" data-field="empresa_cnpj" contenteditable="true">25.140.946/0001-84</span>
+                                    </div>
+                                    <div class="info-line">
+                                        <span class="info-label">Empregado:</span>
+                                        <span class="info-val" data-field="funcionario_nome" contenteditable="true" placeholder="Selecione um funcionário..."></span>
+                                    </div>
+                                    <div class="info-line">
+                                        <span class="info-label">Período:</span>
+                                        <span class="info-val" data-field="periodo" contenteditable="true" placeholder="Ex: 01/06/2026 à 30/06/2026"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="receipt-body">
+                                    <div class="receipt-body-title">DISCRIMINAÇÃO</div>
+                                    
+                                    <div class="receipt-section-header">VENCIMENTOS</div>
+                                    <div class="receipt-rows-container" id="vencimentos-container-1">
+                                        <!-- Inserido via JS -->
+                                    </div>
+                                    <div class="receipt-add-actions no-print">
+                                        <button class="add-row-btn" id="btn-add-vencimento-1">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            Adicionar vencimento
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="receipt-section-header">DESCONTOS (-)</div>
+                                    <div class="receipt-rows-container" id="descontos-container-1">
+                                        <!-- Inserido via JS -->
+                                    </div>
+                                    <div class="receipt-add-actions no-print">
+                                        <button class="add-row-btn" id="btn-add-desconto-1">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            Adicionar desconto
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="receipt-total-row">
+                                        <span class="total-label">TOTAL</span>
+                                        <span class="total-dots"></span>
+                                        <span class="total-val" id="receipt-total-val-1">R$ 0,00</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="receipt-footer">
+                                    <p class="declaration-text">
+                                        Declaro que recebi do empregado acima qualificado, o valor líquido de <span class="declaration-val-inline" id="receipt-declaration-val-1">R$ 0,00</span>
+                                    </p>
+                                    <div class="footer-bottom-grid">
+                                        <div class="city-date-wrapper">
+                                            <span id="city-text-1">Sarandi-PR</span>, <span class="city-date-input" data-field="data_emissao_formatada" contenteditable="true" placeholder="____/____/________"></span>
+                                        </div>
+                                        <div class="signature-wrapper">
+                                            <div class="signature-line"></div>
+                                            <span class="signature-name" data-field="funcionario_nome_upper"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- VIA 2 (Direita) -->
+                            <div class="receipt via-2" data-via="2">
+                                <div class="receipt-title">RECIBO</div>
+                                <div class="receipt-header-info">
+                                    <div class="info-line">
+                                        <span class="info-label">Empregador:</span>
+                                        <span class="info-val" data-field="empresa_nome" contenteditable="true">ESTAMPARIA JL LTDA - ME</span>
+                                    </div>
+                                    <div class="info-line">
+                                        <span class="info-label">CNPJ:</span>
+                                        <span class="info-val" data-field="empresa_cnpj" contenteditable="true">25.140.946/0001-84</span>
+                                    </div>
+                                    <div class="info-line">
+                                        <span class="info-label">Empregado:</span>
+                                        <span class="info-val" data-field="funcionario_nome" contenteditable="true" placeholder="Selecione um funcionário..."></span>
+                                    </div>
+                                    <div class="info-line">
+                                        <span class="info-label">Período:</span>
+                                        <span class="info-val" data-field="periodo" contenteditable="true" placeholder="Ex: 01/06/2026 à 30/06/2026"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="receipt-body">
+                                    <div class="receipt-body-title">DISCRIMINAÇÃO</div>
+                                    
+                                    <div class="receipt-section-header">VENCIMENTOS</div>
+                                    <div class="receipt-rows-container" id="vencimentos-container-2">
+                                        <!-- Inserido via JS -->
+                                    </div>
+                                    <div class="receipt-add-actions no-print">
+                                        <button class="add-row-btn" id="btn-add-vencimento-2">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            Adicionar vencimento
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="receipt-section-header">DESCONTOS (-)</div>
+                                    <div class="receipt-rows-container" id="descontos-container-2">
+                                        <!-- Inserido via JS -->
+                                    </div>
+                                    <div class="receipt-add-actions no-print">
+                                        <button class="add-row-btn" id="btn-add-desconto-2">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            Adicionar desconto
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="receipt-total-row">
+                                        <span class="total-label">TOTAL</span>
+                                        <span class="total-dots"></span>
+                                        <span class="total-val" id="receipt-total-val-2">R$ 0,00</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="receipt-footer">
+                                    <p class="declaration-text">
+                                        Declaro que recebi do empregado acima qualificado, o valor líquido de <span class="declaration-val-inline" id="receipt-declaration-val-2">R$ 0,00</span>
+                                    </p>
+                                    <div class="footer-bottom-grid">
+                                        <div class="city-date-wrapper">
+                                            <span id="city-text-2">Sarandi-PR</span>, <span class="city-date-input" data-field="data_emissao_formatada" contenteditable="true" placeholder="____/____/________"></span>
+                                        </div>
+                                        <div class="signature-wrapper">
+                                            <div class="signature-line"></div>
+                                            <span class="signature-name" data-field="funcionario_nome_upper"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- VIEW: FUNCIONÁRIOS -->
+            <section id="view-funcionarios" class="view-panel">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2>Cadastro de Funcionários</h2>
+                        <p>Gerencie os registros de sua equipe</p>
+                    </div>
+                    <button class="btn btn-primary" id="func-btn-add">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Novo Funcionário
+                    </button>
+                </header>
+                
+                <div class="dashboard-panel">
+                    <div class="search-box">
+                        <input type="text" id="func-search-input" placeholder="🔍 Pesquisar funcionário por nome...">
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="custom-table" id="func-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cargo</th>
+                                    <th>CPF</th>
+                                    <th>Data Admissão</th>
+                                    <th>Salário-Base</th>
+                                    <th>Status Férias</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- VIEW: HISTÓRICO -->
+            <section id="view-historico" class="view-panel">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2>Histórico de Pagamentos</h2>
+                        <p>Visualize e filtre todos os recibos salvos</p>
+                    </div>
+                </header>
+                
+                <div class="filters-panel">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label for="hist-filter-name">Nome do Funcionário</label>
+                            <input type="text" id="hist-filter-name" placeholder="Pesquisar...">
+                        </div>
+                        <div class="form-group">
+                            <label for="hist-filter-month">Mês</label>
+                            <select id="hist-filter-month">
+                                <option value="">Todos</option>
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hist-filter-year">Ano</label>
+                            <select id="hist-filter-year">
+                                <option value="">Todos</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hist-filter-period">Período de Competência</label>
+                            <input type="text" id="hist-filter-period" placeholder="Ex: 06/2026">
+                        </div>
+                        <div class="form-group" style="display:flex; align-items:flex-end;">
+                            <button class="btn btn-secondary" id="hist-btn-clear-filters" style="width:100%;">Limpar Filtros</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-panel">
+                    <div class="table-responsive">
+                        <table class="custom-table" id="hist-table">
+                            <thead>
+                                <tr>
+                                    <th>Funcionário</th>
+                                    <th>Competência</th>
+                                    <th>Período</th>
+                                    <th>Data Emissão</th>
+                                    <th>Valor Líquido</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- VIEW: FÉRIAS -->
+            <section id="view-ferias" class="view-panel">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2>Painel de Férias</h2>
+                        <p>Controle de férias e contagem regressiva de vencimento</p>
+                    </div>
+                </header>
+                
+                <div class="vacation-boards">
+                    <!-- FÉRIAS VENCIDAS -->
+                    <div class="vacation-board-column col-overdue">
+                        <div class="board-column-header">
+                            <h4>Férias Vencidas</h4>
+                            <span class="count-badge" id="ferias-count-overdue">0</span>
+                        </div>
+                        <div class="alerts-list" id="ferias-list-overdue">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- FÉRIAS EM 15 DIAS -->
+                    <div class="vacation-board-column col-15d">
+                        <div class="board-column-header">
+                            <h4>Em até 15 dias</h4>
+                            <span class="count-badge" id="ferias-count-15">0</span>
+                        </div>
+                        <div class="alerts-list" id="ferias-list-15">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- FÉRIAS EM 30 DIAS -->
+                    <div class="vacation-board-column col-30d">
+                        <div class="board-column-header">
+                            <h4>Em até 30 dias</h4>
+                            <span class="count-badge" id="ferias-count-30">0</span>
+                        </div>
+                        <div class="alerts-list" id="ferias-list-30">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- FÉRIAS EM 60 DIAS -->
+                    <div class="vacation-board-column col-60d">
+                        <div class="board-column-header">
+                            <h4>Em até 60 dias</h4>
+                            <span class="count-badge" id="ferias-count-60">0</span>
+                        </div>
+                        <div class="alerts-list" id="ferias-list-60">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- VIEW: CONFIGURAÇÕES -->
+            <section id="view-configuracoes" class="view-panel">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2>Configurações do Sistema</h2>
+                        <p>Ajuste as informações da empresa e a aparência geral</p>
+                    </div>
+                </header>
+                
+                <div class="dashboard-panel settings-container">
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label>Logo da Empresa</label>
+                            <div class="settings-logo-preview" id="settings-logo-preview">
+                                <div class="upload-placeholder" id="settings-logo-placeholder">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                    <span>Clique para carregar logo (PNG/JPG)</span>
+                                </div>
+                                <img id="settings-logo-img" style="display:none;" alt="Logo da empresa">
+                            </div>
+                            <input type="file" id="settings-logo-file" accept="image/*" style="display:none;">
+                            <button type="button" class="btn btn-secondary btn-sm" id="settings-logo-remove-btn" style="display:none; margin-top:8px;">Remover Logo</button>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="settings-empresa-nome">Razão Social / Nome da Empresa</label>
+                                <input type="text" id="settings-empresa-nome" required placeholder="ESTAMPARIA JL LTDA - ME">
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-empresa-cnpj">CNPJ</label>
+                                <input type="text" id="settings-empresa-cnpj" required placeholder="25.140.946/0001-84">
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-empresa-cidade">Cidade (para assinatura)</label>
+                                <input type="text" id="settings-empresa-cidade" required placeholder="Sarandi-PR">
+                            </div>
+                            <div class="form-group">
+                                <label>Cor Principal do Tema</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="color-input-custom" id="settings-cor-picker" value="#1e3f20">
+                                    <input type="text" id="settings-cor-text" style="width:120px;" placeholder="#1e3f20" value="#1e3f20">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+                            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+            
+        </main>
+    </div>
+    
+    <!-- MODAL DE CADASTRO DE FUNCIONÁRIO -->
+    <div class="modal-overlay" id="modal-funcionario">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-funcionario-title">Novo Funcionário</h3>
+                <button class="modal-close" id="modal-funcionario-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-funcionario">
+                    <input type="hidden" id="func-id">
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="func-nome">Nome Completo</label>
+                            <input type="text" id="func-nome" required placeholder="Ex: Kevin Eduardo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-cpf">CPF</label>
+                            <input type="text" id="func-cpf" required placeholder="000.000.000-00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-cargo">Cargo</label>
+                            <input type="text" id="func-cargo" required placeholder="Ex: Auxiliar de Estamparia">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-admissao">Data de Admissão</label>
+                            <input type="date" id="func-admissao" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-salario">Salário-Base (R$)</label>
+                            <input type="number" id="func-salario" step="0.01" required placeholder="Ex: 1621.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-telefone">Telefone</label>
+                            <input type="text" id="func-telefone" placeholder="(44) 99999-9999">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-ferias-status">Status das Férias</label>
+                            <select id="func-ferias-status">
+                                <option value="pendente">Pendente</option>
+                                <option value="programada">Programada</option>
+                                <option value="andamento">Em Andamento</option>
+                                <option value="concluida">Concluída</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-ferias-prevista">Data Prevista das Férias</label>
+                            <input type="date" id="func-ferias-prevista">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="func-ferias-dias">Dias de Férias</label>
+                            <input type="number" id="func-ferias-dias" min="1" max="30" value="30">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="func-observacoes">Observações</label>
+                            <textarea id="func-observacoes" rows="3" placeholder="Insira observações adicionais sobre o funcionário..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="modal-funcionario-cancel">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="modal-funcionario-save">Salvar</button>
+        </div>
+    </div>
+    
+    <!-- MODAL DE NOVA COMPETÊNCIA -->
+    <div class="modal-overlay" id="modal-new-competency">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Duplicar Recibo</h3>
+                <button class="modal-close" id="modal-new-competency-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Informe a nova competência para a cópia do recibo.
+                </p>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label for="dup-month">Mês</label>
+                        <select id="dup-month">
+                            <option value="01">01 - Janeiro</option>
+                            <option value="02">02 - Fevereiro</option>
+                            <option value="03">03 - Março</option>
+                            <option value="04">04 - Abril</option>
+                            <option value="05">05 - Maio</option>
+                            <option value="06">06 - Junho</option>
+                            <option value="07">07 - Julho</option>
+                            <option value="08">08 - Agosto</option>
+                            <option value="09">09 - Setembro</option>
+                            <option value="10">10 - Outubro</option>
+                            <option value="11">11 - Novembro</option>
+                            <option value="12">12 - Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dup-year">Ano</label>
+                        <select id="dup-year">
+                            <!-- Preenchido via JS -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="modal-new-competency-cancel">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="modal-new-competency-submit">Duplicar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL DE COLISÃO DE PERÍODO -->
+    <div class="modal-overlay" id="modal-collision">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>Recibo Existente</h3>
+                <button class="modal-close" id="modal-collision-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning-color)" stroke-width="2" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-color);">
+                        Já existe um recibo deste funcionário para este período. Deseja abrir o existente ou criar outro?
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer" style="flex-direction: column; gap: 8px; align-items: stretch; background-color: white;">
+                <button type="button" class="btn btn-primary" id="modal-collision-open">Abrir existente</button>
+                <button type="button" class="btn btn-secondary" id="modal-collision-create">Criar outro</button>
+                <button type="button" class="btn btn-secondary" id="modal-collision-cancel" style="border: none;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts da aplicação -->
+    <script type="module" src="js/app.js?v=2"></script>
+</body>
+</html>

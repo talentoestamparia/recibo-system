@@ -1,6 +1,7 @@
 {
   "name": "recibo-system",
   "version": "1.0.0",
+  "type": "module",
   "description": "Sistema de Recibos de Pagamento",
   "scripts": {
     "build": "node build.js"

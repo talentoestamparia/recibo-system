@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node build.js"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "supabase": "^2.109.1"
+  }
 }

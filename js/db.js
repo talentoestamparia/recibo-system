@@ -20,6 +20,8 @@
  *        return data;
  *    }
  */
+import { supabase } from './supabase.js?v=2';
+import * as remoteDb from './db_supabase.js?v=2';
 
 // Chaves do LocalStorage
 const KEYS = {
@@ -152,53 +154,176 @@ export async function saveSettings(settings) {
 
 // --- FUNCIONÁRIOS ---
 
+function showConnectionWarning(message) {
+    console.warn(message);
+    const banner = document.createElement('div');
+    banner.className = 'connection-warning-banner';
+    banner.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #f59e0b;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-size: 0.85rem;
+        font-family: sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    banner.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span>${message}</span>
+        <button style="background:none; border:none; color:white; cursor:pointer; font-weight:bold; font-size: 1.1rem; line-height: 1;" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    document.body.appendChild(banner);
+    setTimeout(() => {
+        if (banner.parentElement) banner.remove();
+    }, 6000);
+}
+
 export async function getEmployees() {
-    return new Promise((resolve) => {
-        const data = localStorage.getItem(KEYS.EMPLOYEES);
-        const list = data ? JSON.parse(data) : [];
-        // Ordenar por nome
-        list.sort((a, b) => a.nome.localeCompare(b.nome));
-        resolve(list);
-    });
+    // 1. Tentar sincronizar com o Supabase se houver conexão e usuário logado
+    if (supabase && (await supabase.auth.getSession()).data.session) {
+        try {
+            const remoteList = await remoteDb.fetchEmployeesFromSupabase();
+            if (remoteList) {
+                // Recuperar lista local atual para preservar os dados de férias (não migrados nesta etapa)
+                const localData = localStorage.getItem(KEYS.EMPLOYEES);
+                const localList = localData ? JSON.parse(localData) : [];
+                
+                const syncedList = remoteList.map(remote => {
+                    // Tentar achar correspondente local por ID ou por nome
+                    const localItem = localList.find(l => l.id === remote.id || l.nome === remote.name);
+                    return {
+                        id: remote.id,
+                        nome: remote.name,
+                        cpf: remote.cpf || '',
+                        cargo: remote.job_title || '',
+                        data_admissao: remote.admission_date || '',
+                        salario_base: parseFloat(remote.base_salary || 0),
+                        telefone: remote.phone || '',
+                        observacoes: remote.notes || '',
+                        created_at: remote.created_at,
+                        updated_at: remote.updated_at,
+                        // Preservar propriedades de férias no LocalStorage
+                        ferias_data_prevista: localItem?.ferias_data_prevista || '',
+                        ferias_dias: localItem?.ferias_dias || 30,
+                        ferias_status: localItem?.ferias_status || 'pendente'
+                    };
+                });
+                
+                // Gravar no cache local
+                localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(syncedList));
+                return syncedList.sort((a, b) => a.nome.localeCompare(b.nome));
+            }
+        } catch (err) {
+            console.warn('Erro ao carregar do Supabase (usando LocalStorage cache):', err.message);
+            showConnectionWarning('Não foi possível conectar ao Supabase para atualizar funcionários. Exibindo dados locais.');
+        }
+    }
+    
+    // Fallback LocalStorage
+    const data = localStorage.getItem(KEYS.EMPLOYEES);
+    const list = data ? JSON.parse(data) : [];
+    return list.sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
 export async function getEmployeeById(id) {
-    return new Promise((resolve) => {
-        const data = localStorage.getItem(KEYS.EMPLOYEES);
-        const list = data ? JSON.parse(data) : [];
-        const emp = list.find(e => e.id === id);
-        resolve(emp || null);
-    });
+    const data = localStorage.getItem(KEYS.EMPLOYEES);
+    const list = data ? JSON.parse(data) : [];
+    const emp = list.find(e => e.id === id);
+    return emp || null;
 }
 
 export async function saveEmployee(employee) {
-    return new Promise((resolve) => {
-        const data = localStorage.getItem(KEYS.EMPLOYEES);
-        let list = data ? JSON.parse(data) : [];
-        
-        if (employee.id) {
-            // Editando existente
-            list = list.map(e => e.id === employee.id ? { ...e, ...employee } : e);
+    // 1. Tentar salvar no Supabase se houver conexão e usuário logado
+    if (supabase && (await supabase.auth.getSession()).data.session) {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Sessão inválida ou expirada no Supabase.');
+            
+            const remoteData = {
+                name: employee.nome,
+                cpf: employee.cpf || null,
+                job_title: employee.cargo || null,
+                phone: employee.telefone || null,
+                admission_date: employee.data_admissao || null,
+                base_salary: employee.salario_base || 0,
+                notes: employee.observacoes || null,
+                user_id: user.id
+            };
+            
+            // Verificar se o ID já é um UUID (já existia no Supabase)
+            const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(employee.id);
+            let savedRemote;
+            
+            if (employee.id && isUuid) {
+                // Atualizar
+                savedRemote = await remoteDb.updateEmployeeInSupabase(employee.id, remoteData);
+            } else {
+                // Inserir novo
+                savedRemote = await remoteDb.insertEmployeeToSupabase(remoteData);
+                // Mapear o ID local para o UUID retornado pelo Supabase
+                employee.id = savedRemote.id;
+            }
+            
+            employee.created_at = savedRemote.created_at;
+            employee.updated_at = savedRemote.updated_at;
+        } catch (err) {
+            console.error('Erro ao salvar no Supabase:', err);
+            showConnectionWarning('Erro de conexão/RLS com o Supabase. O funcionário foi salvo apenas localmente.');
+            if (err.message && (err.message.includes('JWT') || err.message.includes('expired'))) {
+                alert('Sua sessão expirou. Por favor, saia e entre novamente no sistema.');
+            }
+        }
+    }
+    
+    // Salvar no LocalStorage (cache/fallback)
+    const data = localStorage.getItem(KEYS.EMPLOYEES);
+    let list = data ? JSON.parse(data) : [];
+    
+    if (employee.id) {
+        // Atualizar se encontrar por ID ou nome
+        const index = list.findIndex(e => e.id === employee.id || e.nome === employee.nome);
+        if (index !== -1) {
+            list[index] = { ...list[index], ...employee };
         } else {
-            // Novo
-            employee.id = 'emp_' + Math.random().toString(36).substr(2, 9);
-            employee.created_at = new Date().toISOString();
             list.push(employee);
         }
-        
-        localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(list));
-        resolve(employee);
-    });
+    } else {
+        // Novo local sem ID pré-definido
+        employee.id = 'emp_' + Math.random().toString(36).substr(2, 9);
+        employee.created_at = new Date().toISOString();
+        list.push(employee);
+    }
+    
+    localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(list));
+    return employee;
 }
 
 export async function deleteEmployee(id) {
-    return new Promise((resolve) => {
-        const data = localStorage.getItem(KEYS.EMPLOYEES);
-        let list = data ? JSON.parse(data) : [];
-        list = list.filter(e => e.id !== id);
-        localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(list));
-        resolve(true);
-    });
+    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
+    
+    // Tentar deletar no Supabase se houver conexão, usuário logado e for um UUID válido
+    if (isUuid && supabase && (await supabase.auth.getSession()).data.session) {
+        try {
+            await remoteDb.deleteEmployeeFromSupabase(id);
+        } catch (err) {
+            console.error('Erro ao excluir no Supabase:', err);
+            showConnectionWarning('Não foi possível excluir no Supabase. A exclusão foi efetuada apenas localmente.');
+        }
+    }
+    
+    // Deletar no LocalStorage
+    const data = localStorage.getItem(KEYS.EMPLOYEES);
+    let list = data ? JSON.parse(data) : [];
+    list = list.filter(e => e.id !== id);
+    localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(list));
+    return true;
 }
 
 // --- RECIBOS ---

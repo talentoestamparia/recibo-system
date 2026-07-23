@@ -1,19 +1,42 @@
 import fs from 'fs';
 import path from 'path';
 
-// 1. Resolver variáveis de ambiente (do Github Actions ou arquivo .env local)
-let supabaseUrl = process.env.SUPABASE_URL || '';
-let supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-
+// 1. Ler arquivo .env local se existir
+let localEnv = {};
 if (fs.existsSync('.env')) {
-    const dotenvContent = fs.readFileSync('.env', 'utf8');
-    const urlMatch = dotenvContent.match(/SUPABASE_URL\s*=\s*(.*)/);
-    const keyMatch = dotenvContent.match(/SUPABASE_ANON_KEY\s*=\s*(.*)/);
-    if (urlMatch && !supabaseUrl) supabaseUrl = urlMatch[1].trim().replace(/^['"]|['"]$/g, '');
-    if (keyMatch && !supabaseAnonKey) supabaseAnonKey = keyMatch[1].trim().replace(/^['"]|['"]$/g, '');
+    try {
+        const dotenvContent = fs.readFileSync('.env', 'utf8');
+        dotenvContent.split('\n').forEach(line => {
+            const parts = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+            if (parts) {
+                const key = parts[1];
+                let value = parts[2] || '';
+                value = value.trim().replace(/^['"]|['"]$/g, '');
+                localEnv[key] = value;
+            }
+        });
+    } catch (err) {
+        console.warn('Erro ao ler arquivo .env local:', err.message);
+    }
 }
 
-// 2. Escrever o arquivo js/env.js na pasta de origem (para desenvolvimento local)
+// 2. Aplicar prioridades
+const supabaseUrl = process.env.SUPABASE_URL || localEnv.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || localEnv.SUPABASE_ANON_KEY || '';
+
+// 3. Validação no build sem exibir valores sensíveis
+console.log('[BUILD] SUPABASE_URL:', supabaseUrl ? 'OK' : 'AUSENTE');
+console.log('[BUILD] SUPABASE_ANON_KEY:', supabaseAnonKey ? 'OK' : 'AUSENTE');
+
+// 4. Bloquear build em produção (GitHub Actions) se as variáveis essenciais estiverem ausentes
+const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
+if (isGithubActions) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Variáveis do Supabase ausentes no build de produção');
+    }
+}
+
+// 5. Escrever o arquivo js/env.js na pasta de origem (para desenvolvimento local)
 const envContent = `// Arquivo gerado automaticamente no build. Não edite manualmente.
 export const env = {
     SUPABASE_URL: "${supabaseUrl}",
@@ -25,9 +48,8 @@ if (!fs.existsSync('js')) {
     fs.mkdirSync('js');
 }
 fs.writeFileSync('js/env.js', envContent);
-console.log('Arquivo js/env.js de desenvolvimento gerado com sucesso!');
 
-// 3. Criar pasta dist se não existir
+// 6. Criar pasta dist se não existir
 if (!fs.existsSync('dist')) {
     fs.mkdirSync('dist');
 }

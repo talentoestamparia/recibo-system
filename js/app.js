@@ -94,12 +94,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('app-container').classList.add('d-none');
             document.getElementById('supabase-error-container').classList.add('d-none');
             document.getElementById('login-container').classList.remove('d-none');
-            
-            // Logs temporários de depuração
-            console.log('[LOGIN] exibindo tela');
-            console.log(document.getElementById('login-container'));
-            console.log(getComputedStyle(document.getElementById('login-container')).display);
-            console.log(document.getElementById('login-container').className);
         }
 
         if (event === 'SIGNED_OUT') {

@@ -9,6 +9,8 @@ import { initHistory } from './historico.js?v=2';
 import { initVacations } from './ferias.js?v=2';
 import { initReceipt } from './recibo.js?v=2';
 
+import { supabase, login, logout, onAuthStateChange } from './supabase.js?v=2';
+
 // Mapeamento de inicializadores de view
 const VIEW_INITIALIZERS = {
     dashboard: () => initDashboard(navigateToView),
@@ -20,8 +22,71 @@ const VIEW_INITIALIZERS = {
 };
 
 let currentView = 'dashboard';
+let isAppInitialized = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Configurar ação do botão Sair (logout)
+    const logoutBtn = document.getElementById('sidebar-btn-logout');
+    if (logoutBtn) {
+        logoutBtn.onclick = async (e) => {
+            e.preventDefault();
+            await logout();
+        };
+    }
+
+    // Se o cliente Supabase não estiver inicializado (ex: sem credenciais), roda em modo offline LocalStorage direto
+    if (!supabase) {
+        console.log('Supabase não conectado. Executando em modo LocalStorage offline.');
+        document.getElementById('login-container').classList.add('d-none');
+        document.getElementById('app-container').classList.remove('d-none');
+        await initializeApp();
+        return;
+    }
+    
+    // Configurar comportamento do formulário de login
+    const loginForm = document.getElementById('login-form');
+    loginForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorAlert = document.getElementById('login-error-alert');
+        const spinner = document.getElementById('login-spinner');
+        const submitBtn = document.getElementById('login-btn-submit');
+        
+        errorAlert.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        const { error } = await login(email, password);
+        
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+        
+        if (error) {
+            errorAlert.innerText = 'E-mail ou senha incorretos.';
+            errorAlert.classList.remove('d-none');
+        }
+    };
+    
+    // Observar estado da autenticação
+    onAuthStateChange(async (event, session) => {
+        if (session) {
+            document.getElementById('login-container').classList.add('d-none');
+            document.getElementById('app-container').classList.remove('d-none');
+            
+            if (!isAppInitialized) {
+                await initializeApp();
+            }
+        } else {
+            document.getElementById('app-container').classList.add('d-none');
+            document.getElementById('login-container').classList.remove('d-none');
+        }
+    });
+});
+
+async function initializeApp() {
+    isAppInitialized = true;
+    
     // 1. Carregar e aplicar configurações iniciais de tema
     const settings = await db.getSettings();
     applyThemeSettings(settings);
@@ -39,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // 5. Verificar importação pendente do Excel
     checkExcelImport(navigateToView);
-});
+}
 
 function setupSidebarNavigation() {
     const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-container" id="app-container">
         <!-- MENU LATERAL -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
@@ -53,6 +53,12 @@
                     <a href="#configuracoes">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.5 1z"></path></svg>
                         <span>Configurações</span>
+                    </a>
+                </li>
+                <li class="menu-item" id="menu-item-logout">
+                    <a href="#logout" id="sidebar-btn-logout">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>Sair</span>
                     </a>
                 </li>
             </ul>
@@ -693,6 +699,40 @@
                 <button type="button" class="btn btn-primary" id="modal-collision-open">Abrir existente</button>
                 <button type="button" class="btn btn-secondary" id="modal-collision-create">Criar outro</button>
                 <button type="button" class="btn btn-secondary" id="modal-collision-cancel" style="border: none;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TELA DE LOGIN -->
+    <div class="login-container d-none" id="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-brand-icon">R</div>
+                <h2>Recibos de Pagamento</h2>
+                <p>Entre com seu e-mail e senha para acessar o sistema</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="login-email" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-color);">E-mail</label>
+                    <input type="email" id="login-email" required placeholder="exemplo@email.com" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="login-password" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-color);">Senha</label>
+                    <input type="password" id="login-password" required placeholder="Digite sua senha" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
+                </div>
+                
+                <div id="login-error-alert" class="login-alert d-none">
+                    E-mail ou senha incorretos.
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="login-btn-submit">
+                    <span>Acessar o Sistema</span>
+                    <div class="spinner d-none" id="login-spinner"></div>
+                </button>
+            </form>
+            <div class="login-footer">
+                <span>Versão 1.0.0</span>
             </div>
         </div>
     </div>

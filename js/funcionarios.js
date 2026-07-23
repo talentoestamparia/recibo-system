@@ -105,10 +105,14 @@ function renderEmployeesTable(list) {
         // Ação de Excluir
         tr.querySelector('.btn-delete').onclick = async () => {
             if (confirm(`Deseja realmente excluir o funcionário ${emp.nome}?`)) {
-                await db.deleteEmployee(emp.id);
-                // Disparar evento para atualizar outras telas
-                window.dispatchEvent(new CustomEvent('employeeDeleted', { detail: emp.id }));
-                await loadEmployees();
+                try {
+                    await db.deleteEmployee(emp.id);
+                    // Disparar evento para atualizar outras telas
+                    window.dispatchEvent(new CustomEvent('employeeDeleted', { detail: emp.id }));
+                    await loadEmployees();
+                } catch (err) {
+                    alert(err.message);
+                }
             }
         };
         
@@ -196,10 +200,14 @@ async function handleSaveEmployee() {
         employeeData.id = id;
     }
     
-    await db.saveEmployee(employeeData);
-    // Notificar mudança para outras telas (como recibo, dashboard)
-    window.dispatchEvent(new CustomEvent('employeeSaved', { detail: employeeData }));
-    
-    closeModal();
-    await loadEmployees();
+    try {
+        await db.saveEmployee(employeeData);
+        // Notificar mudança para outras telas (como recibo, dashboard)
+        window.dispatchEvent(new CustomEvent('employeeSaved', { detail: employeeData }));
+        
+        closeModal();
+        await loadEmployees();
+    } catch (err) {
+        alert(err.message);
+    }
 }

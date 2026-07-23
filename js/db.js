@@ -186,47 +186,63 @@ function showConnectionWarning(message) {
 }
 
 export async function getEmployees() {
-    // 1. Tentar sincronizar com o Supabase se houver conexão e usuário logado
-    if (supabase && (await supabase.auth.getSession()).data.session) {
+    // Verificar se existe cliente Supabase e sessão ativa
+    if (supabase) {
+        let session = null;
         try {
-            const remoteList = await remoteDb.fetchEmployeesFromSupabase();
-            if (remoteList) {
-                // Recuperar lista local atual para preservar os dados de férias (não migrados nesta etapa)
-                const localData = localStorage.getItem(KEYS.EMPLOYEES);
-                const localList = localData ? JSON.parse(localData) : [];
-                
-                const syncedList = remoteList.map(remote => {
-                    // Tentar achar correspondente local por ID ou por nome
-                    const localItem = localList.find(l => l.id === remote.id || l.nome === remote.name);
-                    return {
-                        id: remote.id,
-                        nome: remote.name,
-                        cpf: remote.cpf || '',
-                        cargo: remote.job_title || '',
-                        data_admissao: remote.admission_date || '',
-                        salario_base: parseFloat(remote.base_salary || 0),
-                        telefone: remote.phone || '',
-                        observacoes: remote.notes || '',
-                        created_at: remote.created_at,
-                        updated_at: remote.updated_at,
-                        // Preservar propriedades de férias no LocalStorage
-                        ferias_data_prevista: localItem?.ferias_data_prevista || '',
-                        ferias_dias: localItem?.ferias_dias || 30,
-                        ferias_status: localItem?.ferias_status || 'pendente'
-                    };
-                });
-                
-                // Gravar no cache local
-                localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(syncedList));
-                return syncedList.sort((a, b) => a.nome.localeCompare(b.nome));
-            }
+            const res = await supabase.auth.getSession();
+            session = res.data.session;
         } catch (err) {
-            console.warn('Erro ao carregar do Supabase (usando LocalStorage cache):', err.message);
-            showConnectionWarning('Não foi possível conectar ao Supabase para atualizar funcionários. Exibindo dados locais.');
+            console.error('[AUTH ERROR] Falha ao recuperar sessão:', err.message);
+        }
+
+        if (session) {
+            try {
+                const remoteList = await remoteDb.fetchEmployeesFromSupabase();
+                if (remoteList) {
+                    console.log('[DB STATUS] Funcionários sincronizados com sucesso.');
+                    // Recuperar lista local atual para preservar os dados de férias (não migrados nesta etapa)
+                    const localData = localStorage.getItem(KEYS.EMPLOYEES);
+                    const localList = localData ? JSON.parse(localData) : [];
+                    
+                    const syncedList = remoteList.map(remote => {
+                        // Tentar achar correspondente local por ID ou por nome
+                        const localItem = localList.find(l => l.id === remote.id || l.nome === remote.name);
+                        return {
+                            id: remote.id,
+                            nome: remote.name,
+                            cpf: remote.cpf || '',
+                            cargo: remote.job_title || '',
+                            data_admissao: remote.admission_date || '',
+                            salario_base: parseFloat(remote.base_salary || 0),
+                            telefone: remote.phone || '',
+                            observacoes: remote.notes || '',
+                            created_at: remote.created_at,
+                            updated_at: remote.updated_at,
+                            // Preservar propriedades de férias no LocalStorage
+                            ferias_data_prevista: localItem?.ferias_data_prevista || '',
+                            ferias_dias: localItem?.ferias_dias || 30,
+                            ferias_status: localItem?.ferias_status || 'pendente'
+                        };
+                    });
+                    
+                    // Atualizar cache
+                    localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(syncedList));
+                    return syncedList.sort((a, b) => a.nome.localeCompare(b.nome));
+                }
+            } catch (err) {
+                console.error('[DB ERROR] Falha ao buscar funcionários do Supabase:', err.message);
+                showConnectionWarning('Não foi possível sincronizar os dados com o Supabase. Exibindo cópia local do cache.');
+                
+                // Retornar cache local (nunca substituir o cache com lista vazia se der erro de conexão)
+                const data = localStorage.getItem(KEYS.EMPLOYEES);
+                const list = data ? JSON.parse(data) : [];
+                return list.sort((a, b) => a.nome.localeCompare(b.nome));
+            }
         }
     }
     
-    // Fallback LocalStorage
+    // Modo offline completo (sem cliente Supabase ou sem login ativo)
     const data = localStorage.getItem(KEYS.EMPLOYEES);
     const list = data ? JSON.parse(data) : [];
     return list.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -240,9 +256,16 @@ export async function getEmployeeById(id) {
 }
 
 export async function saveEmployee(employee) {
-    // 1. Tentar salvar no Supabase se houver conexão e usuário logado
-    if (supabase && (await supabase.auth.getSession()).data.session) {
+    if (supabase) {
+        let session = null;
         try {
+            const res = await supabase.auth.getSession();
+            session = res.data.session;
+        } catch (err) {
+            console.error('[AUTH ERROR] Falha ao obter sessão para salvar:', err.message);
+        }
+
+        if (session) {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Sessão inválida ou expirada no Supabase.');
             
@@ -261,33 +284,43 @@ export async function saveEmployee(employee) {
             const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(employee.id);
             let savedRemote;
             
-            if (employee.id && isUuid) {
-                // Atualizar
-                savedRemote = await remoteDb.updateEmployeeInSupabase(employee.id, remoteData);
-            } else {
-                // Inserir novo
-                savedRemote = await remoteDb.insertEmployeeToSupabase(remoteData);
-                // Mapear o ID local para o UUID retornado pelo Supabase
-                employee.id = savedRemote.id;
+            try {
+                if (employee.id && isUuid) {
+                    savedRemote = await remoteDb.updateEmployeeInSupabase(employee.id, remoteData);
+                } else {
+                    savedRemote = await remoteDb.insertEmployeeToSupabase(remoteData);
+                    employee.id = savedRemote.id;
+                }
+                employee.created_at = savedRemote.created_at;
+                employee.updated_at = savedRemote.updated_at;
+                console.log('[DB STATUS] Funcionário salvo com sucesso no Supabase.');
+            } catch (err) {
+                console.error('[DB ERROR] Falha ao salvar no Supabase:', err.message);
+                // Bloquear gravação local e lançar erro claro
+                throw new Error('O banco de dados remoto está indisponível ou você não tem permissão para esta alteração. As alterações exigem uma conexão ativa.');
             }
             
-            employee.created_at = savedRemote.created_at;
-            employee.updated_at = savedRemote.updated_at;
-        } catch (err) {
-            console.error('Erro ao salvar no Supabase:', err);
-            showConnectionWarning('Erro de conexão/RLS com o Supabase. O funcionário foi salvo apenas localmente.');
-            if (err.message && (err.message.includes('JWT') || err.message.includes('expired'))) {
-                alert('Sua sessão expirou. Por favor, saia e entre novamente no sistema.');
+            // Salvar no LocalStorage cache (somente após sucesso no Supabase)
+            const data = localStorage.getItem(KEYS.EMPLOYEES);
+            let list = data ? JSON.parse(data) : [];
+            
+            const index = list.findIndex(e => e.id === employee.id || e.nome === employee.nome);
+            if (index !== -1) {
+                list[index] = { ...list[index], ...employee };
+            } else {
+                list.push(employee);
             }
+            
+            localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(list));
+            return employee;
         }
     }
     
-    // Salvar no LocalStorage (cache/fallback)
+    // Modo offline completo (sem Supabase ou sem login ativo)
     const data = localStorage.getItem(KEYS.EMPLOYEES);
     let list = data ? JSON.parse(data) : [];
     
     if (employee.id) {
-        // Atualizar se encontrar por ID ou nome
         const index = list.findIndex(e => e.id === employee.id || e.nome === employee.nome);
         if (index !== -1) {
             list[index] = { ...list[index], ...employee };
@@ -295,7 +328,6 @@ export async function saveEmployee(employee) {
             list.push(employee);
         }
     } else {
-        // Novo local sem ID pré-definido
         employee.id = 'emp_' + Math.random().toString(36).substr(2, 9);
         employee.created_at = new Date().toISOString();
         list.push(employee);
@@ -308,17 +340,39 @@ export async function saveEmployee(employee) {
 export async function deleteEmployee(id) {
     const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
     
-    // Tentar deletar no Supabase se houver conexão, usuário logado e for um UUID válido
-    if (isUuid && supabase && (await supabase.auth.getSession()).data.session) {
+    if (supabase) {
+        let session = null;
         try {
-            await remoteDb.deleteEmployeeFromSupabase(id);
+            const res = await supabase.auth.getSession();
+            session = res.data.session;
         } catch (err) {
-            console.error('Erro ao excluir no Supabase:', err);
-            showConnectionWarning('Não foi possível excluir no Supabase. A exclusão foi efetuada apenas localmente.');
+            console.error('[AUTH ERROR] Falha ao obter sessão para excluir:', err.message);
+        }
+
+        if (session) {
+            if (isUuid) {
+                try {
+                    await remoteDb.deleteEmployeeFromSupabase(id);
+                    console.log('[DB STATUS] Funcionário excluído com sucesso do Supabase.');
+                } catch (err) {
+                    console.error('[DB ERROR] Falha ao excluir no Supabase:', err.message);
+                    // Bloquear exclusão local e lançar erro claro
+                    throw new Error('O banco de dados remoto está indisponível ou você não tem permissão para esta exclusão. As alterações exigem uma conexão ativa.');
+                }
+            } else {
+                console.log('[DB STATUS] Excluindo funcionário local herdado.');
+            }
+            
+            // Remover do LocalStorage cache
+            const data = localStorage.getItem(KEYS.EMPLOYEES);
+            let list = data ? JSON.parse(data) : [];
+            list = list.filter(e => e.id !== id);
+            localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(list));
+            return true;
         }
     }
     
-    // Deletar no LocalStorage
+    // Modo offline completo (sem Supabase ou sem login ativo)
     const data = localStorage.getItem(KEYS.EMPLOYEES);
     let list = data ? JSON.parse(data) : [];
     list = list.filter(e => e.id !== id);

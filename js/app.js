@@ -34,12 +34,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    // Se o cliente Supabase não estiver inicializado (ex: sem credenciais), roda em modo offline LocalStorage direto
+    // Diferenciar produção e desenvolvimento
+    const isProduction = location.hostname !== 'localhost' && location.hostname !== '127.0.0.1' && location.protocol !== 'file:';
+
+    // Se o cliente Supabase não estiver inicializado (ex: sem credenciais)
     if (!supabase) {
-        console.log('Supabase não conectado. Executando em modo LocalStorage offline.');
-        document.getElementById('login-container').classList.add('d-none');
-        document.getElementById('app-container').classList.remove('d-none');
-        await initializeApp();
+        if (isProduction) {
+            console.error('[SUPABASE ERROR] configuração ausente');
+            document.getElementById('supabase-error-container').classList.remove('d-none');
+            document.getElementById('login-container').classList.add('d-none');
+            document.getElementById('app-container').classList.add('d-none');
+        } else {
+            console.log('Supabase não conectado. Executando em modo LocalStorage offline.');
+            document.getElementById('login-container').classList.add('d-none');
+            document.getElementById('app-container').classList.remove('d-none');
+            await initializeApp();
+        }
         return;
     }
     
@@ -71,15 +81,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Observar estado da autenticação
     onAuthStateChange(async (event, session) => {
         if (session) {
+            console.log('[AUTH] sessão encontrada');
             document.getElementById('login-container').classList.add('d-none');
+            document.getElementById('supabase-error-container').classList.add('d-none');
             document.getElementById('app-container').classList.remove('d-none');
             
             if (!isAppInitialized) {
                 await initializeApp();
             }
         } else {
+            console.log('[AUTH] nenhuma sessão');
             document.getElementById('app-container').classList.add('d-none');
+            document.getElementById('supabase-error-container').classList.add('d-none');
             document.getElementById('login-container').classList.remove('d-none');
+        }
+
+        if (event === 'SIGNED_OUT') {
+            console.log('[AUTH] logout concluído');
         }
     });
 });

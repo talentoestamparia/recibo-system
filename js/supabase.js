@@ -13,10 +13,20 @@ const hasValidCredentials =
     !supabaseUrl.includes('placeholder') && 
     supabaseAnonKey !== 'placeholder-anon-key';
 
+if (hasValidCredentials) {
+    console.log('[SUPABASE] configuração encontrada');
+} else {
+    console.warn('[SUPABASE ERROR] configuração ausente');
+}
+
 // Inicializa o cliente do Supabase
 export const supabase = (window.supabase && hasValidCredentials)
     ? window.supabase.createClient(supabaseUrl, supabaseAnonKey)
     : null;
+
+if (supabase) {
+    console.log('[SUPABASE] cliente inicializado');
+}
 
 /**
  * Verifica se a conexão com o Supabase está ativa e funcional

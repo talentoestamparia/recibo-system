@@ -1510,17 +1510,17 @@ a {
 }
 
 #login-container {
-  display: flex !important;
   min-height: 100vh !important;
+  width: 100% !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: #f4f6f4 !important;
+  padding: 24px !important;
+  background: #f3f6f3 !important;
   opacity: 1 !important;
   visibility: visible !important;
   position: relative !important;
   z-index: 9999 !important;
-  padding: 20px;
-  font-family: var(--font-family);
 }
 
 .login-card {
@@ -1529,70 +1529,22 @@ a {
   max-width: 420px !important;
   padding: 32px !important;
   background: #fff !important;
-  border: 1px solid #ddd !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dfe5df !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 35px rgba(0,0,0,.08) !important;
+  color: #1f2937 !important;
 }
 
-.login-header {
-    text-align: center;
-    margin-bottom: 30px;
+.login-card form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
 }
 
-.login-brand-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-sm);
-    background-color: var(--primary-color);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-}
-
-.login-header h2 {
-    font-size: 1.4rem;
-    color: var(--text-color);
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.login-header p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-}
-
-.login-alert {
-    background-color: #fef2f2;
-    border: 1px solid #fee2e2;
-    color: #ef4444;
-    padding: 12px;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.btn-block {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.login-footer {
-    text-align: center;
-    margin-top: 24px;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+.login-card input,
+.login-card button {
+  width: 100% !important;
+  min-height: 44px !important;
 }
 
 /* Spinner para loading */
@@ -1603,6 +1555,7 @@ a {
     border-radius: 50%;
     border-top-color: white;
     animation: spin 0.8s linear infinite;
+    display: inline-block;
 }
 
 @keyframes spin {

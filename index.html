@@ -740,37 +740,32 @@
     </div>
 
     <!-- TELA DE LOGIN -->
-    <div class="login-container d-none" id="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="login-brand-icon">R</div>
-                <h2>Recibos de Pagamento</h2>
-                <p>Entre com seu e-mail e senha para acessar o sistema</p>
-            </div>
-            
-            <form id="login-form">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label for="login-email" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-color);">E-mail</label>
-                    <input type="email" id="login-email" required placeholder="exemplo@email.com" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
-                </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="login-password" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-color);">Senha</label>
-                    <input type="password" id="login-password" required placeholder="Digite sua senha" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
-                </div>
-                
-                <div id="login-error-alert" class="login-alert d-none">
-                    E-mail ou senha incorretos.
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-block" id="login-btn-submit">
-                    <span>Acessar o Sistema</span>
-                    <div class="spinner d-none" id="login-spinner"></div>
-                </button>
-            </form>
-            <div class="login-footer">
-                <span>Versão 1.0.0</span>
-            </div>
-        </div>
+    <div id="login-container" class="login-container d-none">
+      <div class="login-card">
+        <h1 style="margin-bottom: 8px; font-size: 1.8rem; font-weight: 700; text-align: center; color: var(--primary-color);">Estamparia</h1>
+        <p style="margin-bottom: 24px; font-size: 0.9rem; text-align: center; color: var(--text-muted);">Acesse o sistema de recibos</p>
+
+        <form id="login-form">
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+            <label for="login-email" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">E-mail</label>
+            <input id="login-email" name="email" type="email" autocomplete="username" required placeholder="exemplo@email.com" style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+            <label for="login-password" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Senha</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Digite sua senha" style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
+          </div>
+
+          <div id="login-error-alert" class="login-alert d-none" style="background-color: #fef2f2; border: 1px solid #fee2e2; color: #ef4444; padding: 12px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px; text-align: center;">
+              E-mail ou senha incorretos.
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="login-btn-submit" style="display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 12px; font-weight: 600; cursor: pointer; border: none; border-radius: var(--radius-sm); color: white; background-color: var(--primary-color);">
+              <span>Entrar</span>
+              <div class="spinner d-none" id="login-spinner"></div>
+          </button>
+        </form>
+      </div>
     </div>
     
     <!-- Supabase CDN Client -->

@@ -651,22 +651,7 @@
                         <p>Controle de retiradas de pró-labore, despesas e receitas de sócios</p>
                     </div>
                 </header>
-                <!-- CABEÇALHO EXCLUSIVO PARA IMPRESSÃO PDF -->
-                <div id="prolabore-pdf-header" class="pdf-only-header" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 20px;">
-                        <div>
-                            <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase;">Estamparia JL Ltda - ME</h1>
-                            <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">CNPJ: 25.140.946/0001-84</p>
-                            <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">Sarandi-PR</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase;">Relatório de Pró-labore</h2>
-                            <p style="font-size: 0.85rem; margin: 4px 0 0 0; color: #000;"><strong>Sócio:</strong> <span id="pdf-partner-name">-</span></p>
-                            <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Competência:</strong> <span id="pdf-competency-name">-</span></p>
-                            <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Data de Emissão:</strong> <span id="pdf-emission-date">-</span></p>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div class="filters-panel" style="margin-bottom: 24px;">
                     <div class="filters-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: flex-end; gap: 16px;">
@@ -786,15 +771,6 @@
                                 <!-- Preenchido via JS -->
                             </tbody>
                         </table>
-                </div>
-
-                <!-- ASSINATURA EXCLUSIVA PARA IMPRESSÃO PDF -->
-                <div id="prolabore-pdf-footer" class="pdf-only-footer" style="display: none; margin-top: 50px; padding-top: 20px;">
-                    <div style="display: flex; justify-content: center; margin-top: 40px;">
-                        <div style="text-align: center; width: 350px; border-top: 1px solid #000; padding-top: 8px;">
-                            <p style="font-size: 0.9rem; margin: 0; color: #000;">Assinatura do Sócio: ______________________________________</p>
-                        </div>
-                    </div>
                 </div>
             </section>
             
@@ -1134,6 +1110,9 @@
         </div>
     </div>
     
+    <!-- CONTAINER EXCLUSIVO PARA IMPRESSÃO DO PRÓ-LABORE -->
+    <section id="prolabore-print-report" class="prolabore-print-report"></section>
+
     <!-- Supabase CDN Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     

@@ -839,24 +839,162 @@ function handleProlaborePrint() {
 
     document.title = `Prolabore_${safePartnerName}_${safeMonth}`;
 
-    // Preencher cabeçalho exclusivo do PDF
+    // Obter valores das métricas atuais da tela
+    const grossVal = document.getElementById('prolabore-gross-display')?.innerText || 'R$ 0,00';
+    const expensesVal = document.getElementById('prolabore-expenses-display')?.innerText || 'R$ 0,00';
+    const receivablesVal = document.getElementById('prolabore-receivables-display')?.innerText || 'R$ 0,00';
+    const netVal = document.getElementById('prolabore-net-display')?.innerText || 'R$ 0,00';
+
+    // Obter tabelas clonando apenas as linhas sem botões de ações
+    const expensesRows = Array.from(document.querySelectorAll('#prolabore-expenses-table tbody tr'));
+    const receivablesRows = Array.from(document.querySelectorAll('#prolabore-receivables-table tbody tr'));
+
+    // Mapear gastos
+    let expensesHtml = '';
+    if (expensesRows.length === 0 || expensesRows[0].cells.length < 8) {
+        expensesHtml = `<tr><td colspan="7" style="text-align: center; color: #555;">Nenhum gasto ou despesa lançado para este sócio neste mês.</td></tr>`;
+    } else {
+        expensesHtml = expensesRows.map(tr => {
+            if (tr.cells.length === 1) {
+                return `<tr><td colspan="7" style="text-align: center; color: #555;">${tr.cells[0].innerText}</td></tr>`;
+            }
+            return `
+                <tr>
+                    <td>${tr.cells[0].innerText}</td>
+                    <td>${tr.cells[1].innerText}</td>
+                    <td>${tr.cells[2].innerText}</td>
+                    <td>${tr.cells[3].innerText}</td>
+                    <td>${tr.cells[4].innerText}</td>
+                    <td>${tr.cells[5].innerText}</td>
+                    <td style="font-weight: 600; color: #ef4444;">${tr.cells[6].innerText}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Mapear recebíveis
+    let receivablesHtml = '';
+    if (receivablesRows.length === 0 || receivablesRows[0].cells.length < 7) {
+        receivablesHtml = `<tr><td colspan="6" style="text-align: center; color: #555;">Nenhum valor a receber ou receita lançado para este sócio neste mês.</td></tr>`;
+    } else {
+        receivablesHtml = receivablesRows.map(tr => {
+            if (tr.cells.length === 1) {
+                return `<tr><td colspan="6" style="text-align: center; color: #555;">${tr.cells[0].innerText}</td></tr>`;
+            }
+            const isChkChecked = tr.querySelector('input[type="checkbox"]')?.checked;
+            const statusText = isChkChecked ? 'Sim' : 'Não';
+            return `
+                <tr>
+                    <td>${tr.cells[0].innerText}</td>
+                    <td>${tr.cells[1].innerText}</td>
+                    <td>${tr.cells[2].innerText}</td>
+                    <td>${tr.cells[3].innerText}</td>
+                    <td style="font-weight: 600; color: #10b981;">${tr.cells[4].innerText}</td>
+                    <td>${statusText}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Construir o HTML completo do relatório
     const competencyLabel = getHumanMonthYear(referenceMonth);
-    const pdfPartner = document.getElementById('pdf-partner-name');
-    const pdfComp = document.getElementById('pdf-competency-name');
-    const pdfDate = document.getElementById('pdf-emission-date');
-    
-    if (pdfPartner) pdfPartner.innerText = partnerName.replace(/\s*\(inativo\)\s*/i, '');
-    if (pdfComp) pdfComp.innerText = competencyLabel;
-    if (pdfDate) pdfDate.innerText = new Date().toLocaleDateString('pt-BR');
+    const todayStr = new Date().toLocaleDateString('pt-BR');
+
+    const printReportContainer = document.getElementById('prolabore-print-report');
+    if (printReportContainer) {
+        printReportContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 20px;">
+                <div>
+                    <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase;">Estamparia JL Ltda - ME</h1>
+                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">CNPJ: 25.140.946/0001-84</p>
+                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">Sarandi-PR</p>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase;">Relatório de Pró-labore</h2>
+                    <p style="font-size: 0.85rem; margin: 4px 0 0 0; color: #000;"><strong>Sócio:</strong> <span>${partnerName.replace(/\s*\(inativo\)\s*/i, '')}</span></p>
+                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Competência:</strong> <span>${competencyLabel}</span></p>
+                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Data de Emissão:</strong> <span>${todayStr}</span></p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px;">
+                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Retirada Bruta</span>
+                    <strong style="font-size: 1.2rem; color: #000;">${grossVal}</strong>
+                </div>
+                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px;">
+                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Total de Gastos</span>
+                    <strong style="font-size: 1.2rem; color: #000;">${expensesVal}</strong>
+                </div>
+                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px;">
+                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Valores a Receber / Receitas</span>
+                    <strong style="font-size: 1.2rem; color: #000;">${receivablesVal}</strong>
+                </div>
+                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px; border-left: 3px solid #000;">
+                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Saldo Líquido</span>
+                    <strong style="font-size: 1.2rem; color: #000;">${netVal}</strong>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000;">Gastos e Despesas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:12%">Data</th>
+                        <th style="width:12%">Tipo</th>
+                        <th style="width:15%">Categoria</th>
+                        <th style="width:15%">Fornecedor</th>
+                        <th>Descrição</th>
+                        <th style="width:10%">Parcela</th>
+                        <th style="width:12%">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${expensesHtml}
+                </tbody>
+            </table>
+
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 30px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000;">Valores a Receber e Receitas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:12%">Data</th>
+                        <th style="width:15%">Tipo</th>
+                        <th style="width:15%">Categoria</th>
+                        <th>Descrição</th>
+                        <th style="width:15%">Valor</th>
+                        <th style="width:15%">Recebido?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${receivablesHtml}
+                </tbody>
+            </table>
+
+            <div style="display: flex; justify-content: center; margin-top: 60px;">
+                <div style="text-align: center; width: 350px; border-top: 1px solid #000; padding-top: 8px;">
+                    <p style="font-size: 0.9rem; margin: 0; color: #000;">Assinatura do Sócio: ______________________________________</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // Ativar a classe de impressão de Pró-labore no body
+    document.body.classList.add('printing-prolabore');
 
     const restoreTitle = () => {
         document.title = originalTitle;
+        document.body.classList.remove('printing-prolabore');
+        if (printReportContainer) printReportContainer.innerHTML = '';
         window.removeEventListener('afterprint', restoreTitle);
     };
 
     window.addEventListener('afterprint', restoreTitle);
 
-    setTimeout(() => {
-        window.print();
-    }, 100);
+    // Garantir renderização completa dos frames antes de abrir janela de impressão
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            window.print();
+        });
+    });
 }

@@ -1569,127 +1569,68 @@ a {
     }
 }
 
-/* --- Impressão do Relatório de Pró-labore --- */
+/* --- Estilos do Contêiner de Impressão de Pró-labore --- */
+.prolabore-print-report {
+    display: none;
+}
+
 @media print {
-  /* Se a view de pró-labore estiver ativa, formatar para impressão de relatório */
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-
-  /* Ocultar elementos desnecessários na impressão */
-  .sidebar,
-  .main-header,
-  .filters-panel,
-  .modal-overlay,
-  .btn,
-  .btn-action,
-  .btn-icon {
-    display: none !important;
-  }
-
-  /* Ocultar outras views */
-  .view-panel:not(#view-prolabore) {
-    display: none !important;
-  }
-
-  /* Ajustar o container de conteúdo principal */
-  .main-content {
-    margin-left: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    min-height: auto !important;
-  }
-
-  /* Exibir elementos exclusivos do PDF no pró-labore */
-  #view-prolabore #prolabore-pdf-header {
-    display: block !important;
-  }
-
-  #view-prolabore #prolabore-pdf-footer {
-    display: block !important;
-  }
-
-  /* Esconder a coluna de ações e checkboxes nas tabelas */
-  #prolabore-expenses-table th:last-child,
-  #prolabore-expenses-table td:last-child,
-  #prolabore-receivables-table th:last-child,
-  #prolabore-receivables-table td:last-child {
-    display: none !important;
-  }
-
-  /* Estilizar checkboxes para imprimir Sim/Não */
-  #prolabore-receivables-table input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    border: none;
-    background: none;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    height: auto;
-  }
-
-  #prolabore-receivables-table input[type="checkbox"]::after {
-    content: "Não" !important;
-    display: inline-block !important;
-    font-size: 0.85rem !important;
-    color: #000 !important;
-  }
-
-  #prolabore-receivables-table input[type="checkbox"]:checked::after {
-    content: "Sim" !important;
-  }
-
-  /* Estilo do papel e margens */
   @page {
     size: A4 landscape;
     margin: 10mm;
   }
 
-  /* Tabelas */
-  .custom-table {
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Quando estiver imprimindo pró-labore, esconde todos os filhos diretos do body, exceto o relatório */
+  body.printing-prolabore > * {
+    display: none !important;
+  }
+
+  body.printing-prolabore > #prolabore-print-report {
+    display: block !important;
+  }
+
+  #prolabore-print-report {
     width: 100% !important;
-    border-collapse: collapse !important;
-    background-color: #fff !important;
     color: #000 !important;
+    background: #fff !important;
+    font-family: Arial, sans-serif !important;
   }
 
-  .custom-table th, 
-  .custom-table td {
-    border: 1px solid #000 !important;
-    padding: 6px 8px !important;
-    font-size: 0.85rem !important;
-    color: #000 !important;
-    background-color: transparent !important;
+  #prolabore-print-report table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
   }
 
-  .custom-table th {
-    font-weight: bold !important;
+  #prolabore-print-report th,
+  #prolabore-print-report td {
+    border: 1px solid #999;
+    padding: 6px;
+    font-size: 0.85rem;
+    color: #000 !important;
+    text-align: left;
+  }
+
+  #prolabore-print-report th {
     background-color: #e5e7eb !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    font-weight: bold;
   }
 
-  .custom-table thead {
-    display: table-header-group !important;
+  #prolabore-print-report thead {
+    display: table-header-group;
   }
 
-  .custom-table tr {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* Remover sombras de cards de métricas */
-  .metric-card {
-    border: 1px solid #000 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-
-  .metric-card * {
-    color: #000 !important;
-    text-shadow: none !important;
+  #prolabore-print-report tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
 

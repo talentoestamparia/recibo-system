@@ -555,30 +555,39 @@ async function loadProlaboreData(partnerId, monthStr) {
 }
 
 /**
+ * Identifica se uma transação é do próprio pró-labore principal (para ignorar no detalhamento)
+ */
+function isProlaboreTransaction(item) {
+    const desc = (item.description || '').toLowerCase();
+    const cat = (item.category || '').toLowerCase();
+    return desc.includes('prolabore') || desc.includes('pró-labore') || cat.includes('prolabore') || cat.includes('pró-labore');
+}
+
+/**
  * Renderiza os dados do Pró-labore no DOM
  */
 function renderScreen() {
     if (!currentPeriod) return;
 
-    // Retirada Bruta
+    // Retirada Bruta (Valor do Pró-labore)
     const grossDisplay = document.getElementById('prolabore-gross-display');
     if (grossDisplay) grossDisplay.innerText = formatCurrency(currentPeriod.gross_amount);
 
-    // Separar despesas de receitas
-    const expenses = currentTransactions.filter(t => t.type === 'expense' || t.type === 'tax' || t.type === 'withdraw');
-    const receivables = currentTransactions.filter(t => t.type === 'receivable' || t.type === 'income');
+    // Separar despesas de receitas (filtrando transações de Pró-labore)
+    const expenses = currentTransactions.filter(t => (t.type === 'expense' || t.type === 'tax' || t.type === 'withdraw') && !isProlaboreTransaction(t));
+    const receivables = currentTransactions.filter(t => (t.type === 'receivable' || t.type === 'income') && !isProlaboreTransaction(t));
 
     // Somar Totais
     const expensesTotal = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
-    const receivablesTotal = receivables.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
-    const netBalance = parseFloat(currentPeriod.gross_amount) - expensesTotal + receivablesTotal;
+    const receivablesReceived = receivables.filter(t => t.is_received === true).reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+    const netBalance = parseFloat(currentPeriod.gross_amount) + receivablesReceived - expensesTotal;
 
     // Atualizar displays de métricas
     const expensesDisplay = document.getElementById('prolabore-expenses-display');
     if (expensesDisplay) expensesDisplay.innerText = formatCurrency(expensesTotal);
 
     const receivablesDisplay = document.getElementById('prolabore-receivables-display');
-    if (receivablesDisplay) receivablesDisplay.innerText = formatCurrency(receivablesTotal);
+    if (receivablesDisplay) receivablesDisplay.innerText = formatCurrency(receivablesReceived);
 
     const netDisplay = document.getElementById('prolabore-net-display');
     if (netDisplay) {
@@ -710,7 +719,7 @@ function renderReceivablesTable(list) {
     if (!tbody) return;
 
     if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum valor a receber ou receita lançado para este sócio neste mês.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma receita extra lançada nesta competência.</td></tr>`;
         return;
     }
 
@@ -844,21 +853,21 @@ function handleProlaborePrint() {
 
     document.title = `Prolabore_${safePartnerName}_${safeMonth}`;
 
-    // Filtrar e calcular diretamente das variáveis de estado carregadas (currentTransactions / currentPeriod)
-    const expenses = currentTransactions.filter(item => item.type === 'expense' || item.type === 'tax' || item.type === 'withdraw');
-    const receivables = currentTransactions.filter(item => item.type === 'receivable' || item.type === 'income');
+    // Filtrar e calcular diretamente das variáveis de estado carregadas (filtrando transações de Pró-labore principal)
+    const expenses = currentTransactions.filter(item => (item.type === 'expense' || item.type === 'tax' || item.type === 'withdraw') && !isProlaboreTransaction(item));
+    const receivables = currentTransactions.filter(item => (item.type === 'receivable' || item.type === 'income') && !isProlaboreTransaction(item));
 
     // Ordenar ambas as listas por data
     expenses.sort((a, b) => new Date(a.transaction_date || '') - new Date(b.transaction_date || ''));
     receivables.sort((a, b) => new Date(a.transaction_date || '') - new Date(b.transaction_date || ''));
 
-    const totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const totalDiscounts = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
     const totalReceived = receivables.filter(item => item.is_received === true).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
     const totalPending = receivables.filter(item => item.is_received !== true).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
-    const grossAmount = parseFloat(currentPeriod.gross_amount || 0);
-    const netAmount = grossAmount - totalExpenses + totalReceived;
+    const grossProlabore = parseFloat(currentPeriod.gross_amount || 0);
+    const netReceivable = grossProlabore + totalReceived - totalDiscounts;
 
-    const totalReceivablesGeral = totalReceived + totalPending;
+    const totalExtraIncomeAll = receivables.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
 
     // Gerar mapeamento amigável de tipos para exibição
     const typeLabels = {
@@ -872,7 +881,7 @@ function handleProlaborePrint() {
     // Montar as linhas de despesas
     let expensesRowsHtml = '';
     if (expenses.length === 0) {
-        expensesRowsHtml = `<tr><td colspan="7" style="text-align: center; color: #555; padding: 10px;">Nenhuma despesa lançada para este sócio neste mês.</td></tr>`;
+        expensesRowsHtml = `<tr><td colspan="7" style="text-align: center; color: #555; padding: 10px;">Nenhuma despesa ou desconto lançado para este sócio neste mês.</td></tr>`;
     } else {
         expensesRowsHtml = expenses.map(item => {
             const dateStr = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
@@ -894,10 +903,10 @@ function handleProlaborePrint() {
         }).join('');
     }
 
-    // Montar as linhas de receitas e recebíveis
+    // Montar as linhas de receitas extras
     let receivablesRowsHtml = '';
     if (receivables.length === 0) {
-        receivablesRowsHtml = `<tr><td colspan="6" style="text-align: center; color: #555; padding: 10px;">Nenhuma receita ou valor a receber lançado para este sócio neste mês.</td></tr>`;
+        receivablesRowsHtml = `<tr><td colspan="6" style="text-align: center; color: #555; padding: 10px;">Nenhuma receita extra lançada nesta competência.</td></tr>`;
     } else {
         receivablesRowsHtml = receivables.map(item => {
             const dateStr = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
@@ -949,35 +958,31 @@ function handleProlaborePrint() {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Retirada bruta</td>
-                            <td>${formatCurrency(grossAmount)}</td>
+                            <td>Valor do pró-labore</td>
+                            <td>${formatCurrency(grossProlabore)}</td>
                         </tr>
                         <tr>
-                            <td>Total de despesas</td>
-                            <td>${formatCurrency(totalExpenses)}</td>
-                        </tr>
-                        <tr>
-                            <td>Total de valores a receber pendentes</td>
-                            <td>${formatCurrency(totalPending)}</td>
-                        </tr>
-                        <tr>
-                            <td>Total de receitas recebidas</td>
+                            <td>Receitas extras</td>
                             <td>${formatCurrency(totalReceived)}</td>
                         </tr>
+                        <tr>
+                            <td>Descontos</td>
+                            <td>${formatCurrency(totalDiscounts)}</td>
+                        </tr>
                         <tr class="net-row">
-                            <td>Saldo líquido</td>
-                            <td>${formatCurrency(netAmount)}</td>
+                            <td>Valor líquido a receber</td>
+                            <td>${formatCurrency(netReceivable)}</td>
                         </tr>
                     </tbody>
                 </table>
                 <p style="font-size: 7.5px; color: #555; font-style: italic; margin-top: 1mm; margin-bottom: 2mm;">
-                    Fórmula de cálculo: Saldo líquido = Retirada bruta - Despesas + Receitas recebidas
+                    Valor líquido a receber = Pró-labore + Receitas extras - Descontos
                 </p>
             </div>
 
             <!-- TABELA GASTOS E DESPESAS -->
             <div class="print-section">
-                <h2>Despesas</h2>
+                <h2>Despesas e Descontos</h2>
                 <table class="expenses-table">
                     <colgroup>
                         <col>
@@ -1004,16 +1009,16 @@ function handleProlaborePrint() {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="6" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de despesas</td>
-                            <td style="text-align: right; font-weight: bold; color: #ef4444;">${formatCurrency(totalExpenses)}</td>
+                            <td colspan="6" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de descontos</td>
+                            <td style="text-align: right; font-weight: bold; color: #ef4444;">${formatCurrency(totalDiscounts)}</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
 
-            <!-- TABELA RECEITAS E VALORES A RECEBER -->
+            <!-- TABELA RECEITAS EXTRAS -->
             <div class="print-section">
-                <h2>Receitas e Valores a Receber</h2>
+                <h2>Receitas Extras</h2>
                 <table class="receivables-table">
                     <colgroup>
                         <col>
@@ -1038,16 +1043,8 @@ function handleProlaborePrint() {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total recebido</td>
-                            <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalReceived)}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total pendente</td>
-                            <td style="text-align: right; font-weight: bold; color: #d97706;">${formatCurrency(totalPending)}</td>
-                        </tr>
-                        <tr style="background-color: #f3f4f6;">
-                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total geral</td>
-                            <td style="text-align: right; font-weight: bold;">${formatCurrency(totalReceivablesGeral)}</td>
+                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de receitas extras</td>
+                            <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalExtraIncomeAll)}</td>
                         </tr>
                     </tfoot>
                 </table>

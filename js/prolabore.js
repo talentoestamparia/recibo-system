@@ -188,11 +188,10 @@ function setupListeners() {
         };
     }
 
-    const btnPdf = document.getElementById('prolabore-btn-pdf');
+    const btnPdf = document.getElementById('btn-prolabore-pdf');
+    console.log('Botão PDF encontrado:', btnPdf);
     if (btnPdf) {
-        btnPdf.onclick = () => {
-            printProlaboreReport();
-        };
+        btnPdf.addEventListener('click', handleProlaborePrint);
     }
 
     // Modal Transações
@@ -816,41 +815,48 @@ function getHumanMonthYear(monthStr) {
 /**
  * Prepara o HTML e dispara a impressão do relatório em PDF
  */
-function printProlaboreReport() {
-    const monthSelect = document.getElementById('prolabore-month-select');
-    if (!currentPartnerId || !monthSelect || !monthSelect.value) {
+function handleProlaborePrint() {
+    console.log('Clique em Salvar em PDF');
+    const partnerSelect = document.getElementById('prolabore-partner-select');
+    const monthInput = document.getElementById('prolabore-month-select');
+
+    if (!partnerSelect || !monthInput || !monthInput.value) {
         alert('Selecione um sócio e uma competência para gerar o PDF.');
         return;
     }
 
-    const partnerObj = allPartners.find(p => p.id === currentPartnerId);
-    const partnerName = partnerObj ? partnerObj.name : 'Sócio';
-    const competencyLabel = getHumanMonthYear(monthSelect.value);
-    
-    // 1. Preencher cabeçalho exclusivo do PDF
+    const partnerName = partnerSelect.options[partnerSelect.selectedIndex]?.text?.trim() || 'Socio';
+    const referenceMonth = monthInput.value || '';
+
+    const safePartnerName = partnerName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+
+    const safeMonth = referenceMonth.replace('-', '_');
+    const originalTitle = document.title;
+
+    document.title = `Prolabore_${safePartnerName}_${safeMonth}`;
+
+    // Preencher cabeçalho exclusivo do PDF
+    const competencyLabel = getHumanMonthYear(referenceMonth);
     const pdfPartner = document.getElementById('pdf-partner-name');
     const pdfComp = document.getElementById('pdf-competency-name');
     const pdfDate = document.getElementById('pdf-emission-date');
     
-    if (pdfPartner) pdfPartner.innerText = partnerName;
+    if (pdfPartner) pdfPartner.innerText = partnerName.replace(/\s*\(inativo\)\s*/i, '');
     if (pdfComp) pdfComp.innerText = competencyLabel;
     if (pdfDate) pdfDate.innerText = new Date().toLocaleDateString('pt-BR');
 
-    // 2. Definir o título temporário do documento para sugestão de nome de arquivo
-    const safePartnerName = partnerName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
-    const [year, month] = monthSelect.value.split('-');
-    const tempTitle = `Prolabore_${safePartnerName}_${month}-${year}`;
-    
-    const originalTitle = document.title;
-    document.title = tempTitle;
-
-    // 3. Registrar ouvinte para restaurar o título após a impressão
     const restoreTitle = () => {
         document.title = originalTitle;
         window.removeEventListener('afterprint', restoreTitle);
     };
+
     window.addEventListener('afterprint', restoreTitle);
 
-    // 4. Chamar a janela de impressão nativa
-    window.print();
+    setTimeout(() => {
+        window.print();
+    }, 100);
 }

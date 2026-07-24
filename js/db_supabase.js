@@ -1,7 +1,7 @@
 /**
  * Camada de Acesso a Dados do Supabase (employees)
  */
-import { supabase } from './supabase.js?v=2';
+import { supabase } from './supabase.js?v=11';
 
 /**
  * Busca a lista de funcionários cadastrados no Supabase para o usuário logado

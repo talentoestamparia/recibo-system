@@ -89,4 +89,25 @@ copyRecursiveSync('style.css', 'dist/style.css');
 copyRecursiveSync('js', 'dist/js');
 copyRecursiveSync('recibo', 'dist/recibo');
 
+// 7. Validar se dist/index.html contém todos os elementos de login necessários
+const distIndexPath = 'dist/index.html';
+if (!fs.existsSync(distIndexPath)) {
+    throw new Error('Erro: dist/index.html não foi criado durante o build.');
+}
+const distIndexContent = fs.readFileSync(distIndexPath, 'utf8');
+const requiredElements = [
+    'id="login-container"',
+    'class="login-card"',
+    'id="login-form"',
+    'id="login-email"',
+    'id="login-password"'
+];
+
+requiredElements.forEach(elem => {
+    if (!distIndexContent.includes(elem)) {
+        throw new Error(`Erro de Validação de Produção: dist/index.html está incompleto, faltando a tag: ${elem}`);
+    }
+});
+
+console.log('[BUILD VALIDATION] dist/index.html validado com sucesso! Todos os elementos de login estão presentes.');
 console.log('Build finalizado com sucesso! Pasta dist pronta para publicação.');

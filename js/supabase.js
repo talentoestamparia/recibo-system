@@ -1,7 +1,7 @@
 /**
  * Integração Supabase - Cliente Centralizado
  */
-import { env } from './env.js?v=2';
+import { env } from './env.js?v=11';
 
 const supabaseUrl = env.SUPABASE_URL;
 const supabaseAnonKey = env.SUPABASE_ANON_KEY;

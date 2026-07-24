@@ -1,15 +1,15 @@
 /**
  * Sistema de Recibos de Pagamento - SPA App Core
  */
-import * as db from './db.js?v=2';
-import { applyThemeSettings, initSettings } from './configuracoes.js?v=2';
-import { initDashboard, checkExcelImport } from './dashboard.js?v=2';
-import { initEmployees } from './funcionarios.js?v=2';
-import { initHistory } from './historico.js?v=2';
-import { initVacations } from './ferias.js?v=2';
-import { initReceipt } from './recibo.js?v=2';
+import * as db from './db.js?v=11';
+import { applyThemeSettings, initSettings } from './configuracoes.js?v=11';
+import { initDashboard, checkExcelImport } from './dashboard.js?v=11';
+import { initEmployees } from './funcionarios.js?v=11';
+import { initHistory } from './historico.js?v=11';
+import { initVacations } from './ferias.js?v=11';
+import { initReceipt } from './recibo.js?v=11';
 
-import { supabase, login, logout, getSession, onAuthStateChange } from './supabase.js?v=2';
+import { supabase, login, logout, getSession, onAuthStateChange } from './supabase.js?v=11';
 
 // Mapeamento de inicializadores de view
 const VIEW_INITIALIZERS = {

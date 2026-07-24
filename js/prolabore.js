@@ -84,8 +84,7 @@ function renderPartnersDropdown() {
 function setupListeners() {
     const partnerSelect = document.getElementById('prolabore-partner-select');
     const monthSelect = document.getElementById('prolabore-month-select');
-    const btnEditGross = document.getElementById('prolabore-btn-edit-gross');
-    const btnSaveGross = document.getElementById('prolabore-btn-save-gross');
+    const btnSaveGrossAmount = document.getElementById('prolabore-btn-save-gross-amount');
     const btnCopyModel = document.getElementById('prolabore-btn-copy-model');
     const btnAddExpense = document.getElementById('prolabore-btn-add-expense');
     const btnAddReceivable = document.getElementById('prolabore-btn-add-receivable');
@@ -123,36 +122,17 @@ function setupListeners() {
         };
     }
 
-    if (btnEditGross) {
-        btnEditGross.onclick = () => {
-            const display = document.getElementById('prolabore-gross-display');
-            const wrapper = document.getElementById('prolabore-gross-edit-wrapper');
-            const input = document.getElementById('prolabore-gross-input');
-            
-            if (display && wrapper && input && currentPeriod) {
-                display.classList.add('d-none');
-                wrapper.classList.remove('d-none');
-                input.value = currentPeriod.gross_amount;
-                input.focus();
-            }
-        };
-    }
-
-    if (btnSaveGross) {
-        btnSaveGross.onclick = async () => {
-            const display = document.getElementById('prolabore-gross-display');
-            const wrapper = document.getElementById('prolabore-gross-edit-wrapper');
-            const input = document.getElementById('prolabore-gross-input');
-            
-            if (display && wrapper && input && currentPeriod) {
+    if (btnSaveGrossAmount) {
+        btnSaveGrossAmount.onclick = async () => {
+            const input = document.getElementById('prolabore-gross-amount-input');
+            if (input && currentPeriod) {
                 const amount = parseFloat(input.value) || 0;
                 try {
                     await updateProlaboreGrossAmount(currentPeriod.id, amount);
-                    wrapper.classList.add('d-none');
-                    display.classList.remove('d-none');
                     await loadProlaboreData(currentPartnerId, monthSelect.value);
+                    alert('Valor do Pró-labore atualizado com sucesso!');
                 } catch (err) {
-                    alert('Erro ao atualizar retirada bruta: ' + err.message);
+                    alert('Erro ao atualizar valor do Pró-labore: ' + err.message);
                 }
             }
         };
@@ -263,16 +243,16 @@ function toggleModalFormFields(type) {
     const installmentGroup = document.getElementById('prolabore-trans-installment-group');
     const totalInstallmentsGroup = document.getElementById('prolabore-trans-total-installments-group');
 
+    if (receivedGroup) receivedGroup.style.display = 'none';
+
     if (type === 'expense' || type === 'tax' || type === 'withdraw') {
         if (supplierGroup) supplierGroup.style.display = 'block';
         if (installmentGroup) installmentGroup.style.display = 'block';
         if (totalInstallmentsGroup) totalInstallmentsGroup.style.display = 'block';
-        if (receivedGroup) receivedGroup.style.display = 'none';
     } else {
         if (supplierGroup) supplierGroup.style.display = 'none';
         if (installmentGroup) installmentGroup.style.display = 'none';
         if (totalInstallmentsGroup) totalInstallmentsGroup.style.display = 'none';
-        if (receivedGroup) receivedGroup.style.display = 'flex';
     }
 }
 
@@ -352,7 +332,7 @@ async function saveTransaction() {
     const supplier = document.getElementById('prolabore-trans-supplier').value;
     const description = document.getElementById('prolabore-trans-description').value;
     const amount = parseFloat(document.getElementById('prolabore-trans-amount').value) || 0;
-    const isReceived = document.getElementById('prolabore-trans-received').checked;
+    const isReceived = (type === 'receivable' || type === 'income');
     const installment = parseInt(document.getElementById('prolabore-trans-installment').value) || null;
     const totalInstallments = parseInt(document.getElementById('prolabore-trans-total-installments').value) || null;
     const attachment = document.getElementById('prolabore-trans-attachment').value;
@@ -569,6 +549,12 @@ function isProlaboreTransaction(item) {
 function renderScreen() {
     if (!currentPeriod) return;
 
+    // Carregar o valor no input do painel do topo (se não estiver focado)
+    const grossInput = document.getElementById('prolabore-gross-amount-input');
+    if (grossInput && document.activeElement !== grossInput) {
+        grossInput.value = currentPeriod.gross_amount;
+    }
+
     // Retirada Bruta (Valor do Pró-labore)
     const grossDisplay = document.getElementById('prolabore-gross-display');
     if (grossDisplay) grossDisplay.innerText = formatCurrency(currentPeriod.gross_amount);
@@ -579,15 +565,15 @@ function renderScreen() {
 
     // Somar Totais
     const expensesTotal = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
-    const receivablesReceived = receivables.filter(t => t.is_received === true).reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
-    const netBalance = parseFloat(currentPeriod.gross_amount) + receivablesReceived - expensesTotal;
+    const receivablesTotal = receivables.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+    const netBalance = parseFloat(currentPeriod.gross_amount) + receivablesTotal - expensesTotal;
 
     // Atualizar displays de métricas
     const expensesDisplay = document.getElementById('prolabore-expenses-display');
     if (expensesDisplay) expensesDisplay.innerText = formatCurrency(expensesTotal);
 
     const receivablesDisplay = document.getElementById('prolabore-receivables-display');
-    if (receivablesDisplay) receivablesDisplay.innerText = formatCurrency(receivablesReceived);
+    if (receivablesDisplay) receivablesDisplay.innerText = formatCurrency(receivablesTotal);
 
     const netDisplay = document.getElementById('prolabore-net-display');
     if (netDisplay) {
@@ -646,8 +632,22 @@ function renderExpensesTable(list) {
     const tbody = document.querySelector('#prolabore-expenses-table tbody');
     if (!tbody) return;
 
+    const table = tbody.parentElement;
+    let tfoot = table.querySelector('tfoot');
+    if (!tfoot) {
+        tfoot = document.createElement('tfoot');
+        table.appendChild(tfoot);
+    }
+
     if (list.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum gasto ou despesa lançado para este sócio neste mês.</td></tr>`;
+        tfoot.innerHTML = `
+            <tr style="font-weight: bold; background-color: var(--bg-light);">
+                <td colspan="6" style="text-align: right; padding: 12px; text-transform: uppercase;">Total de Descontos</td>
+                <td style="color: #ef4444; padding: 12px; text-align: right;">${formatCurrency(0)}</td>
+                <td></td>
+            </tr>
+        `;
         return;
     }
 
@@ -689,6 +689,15 @@ function renderExpensesTable(list) {
         `;
     }).join('');
 
+    const totalDiscounts = list.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+    tfoot.innerHTML = `
+        <tr style="font-weight: bold; background-color: var(--bg-light);">
+            <td colspan="6" style="text-align: right; padding: 12px; text-transform: uppercase;">Total de Descontos</td>
+            <td style="color: #ef4444; padding: 12px;">${formatCurrency(totalDiscounts)}</td>
+            <td></td>
+        </tr>
+    `;
+
     tbody.querySelectorAll('.edit-btn').forEach(btn => {
         btn.onclick = () => {
             const trans = currentTransactions.find(t => t.id === btn.dataset.id);
@@ -718,14 +727,27 @@ function renderReceivablesTable(list) {
     const tbody = document.querySelector('#prolabore-receivables-table tbody');
     if (!tbody) return;
 
+    const table = tbody.parentElement;
+    let tfoot = table.querySelector('tfoot');
+    if (!tfoot) {
+        tfoot = document.createElement('tfoot');
+        table.appendChild(tfoot);
+    }
+
     if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma receita extra lançada nesta competência.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhuma receita extra lançada nesta competência.</td></tr>`;
+        tfoot.innerHTML = `
+            <tr style="font-weight: bold; background-color: var(--bg-light);">
+                <td colspan="4" style="text-align: right; padding: 12px; text-transform: uppercase;">Total de Receitas Extras</td>
+                <td style="color: #10b981; padding: 12px; text-align: right;">${formatCurrency(0)}</td>
+                <td></td>
+            </tr>
+        `;
         return;
     }
 
     tbody.innerHTML = list.map(item => {
         const dateBR = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
-        const checkedAttribute = item.is_received ? 'checked' : '';
         
         const attachmentHtml = item.attachment_url
             ? `<a href="${item.attachment_url}" target="_blank" title="Ver Comprovante" style="margin-left: 8px; color: var(--primary-color);">
@@ -744,9 +766,6 @@ function renderReceivablesTable(list) {
                 </td>
                 <td style="font-weight: 600; color: #10b981;">${formatCurrency(item.amount)}</td>
                 <td>
-                    <input type="checkbox" class="received-chk" data-id="${item.id}" ${checkedAttribute} style="width: 18px; height: 18px; cursor: pointer;">
-                </td>
-                <td>
                     <div style="display: flex; gap: 8px;">
                         <button class="btn-action edit-btn" data-id="${item.id}" title="Editar">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -760,28 +779,14 @@ function renderReceivablesTable(list) {
         `;
     }).join('');
 
-    tbody.querySelectorAll('.received-chk').forEach(chk => {
-        chk.onchange = async () => {
-            const trans = currentTransactions.find(t => t.id === chk.dataset.id);
-            if (trans) {
-                try {
-                    await saveProlaboreTransaction({
-                        id: trans.id,
-                        period_id: trans.period_id,
-                        type: trans.type,
-                        description: trans.description,
-                        amount: trans.amount,
-                        is_received: chk.checked
-                    });
-                    const monthSelect = document.getElementById('prolabore-month-select');
-                    await loadProlaboreData(currentPartnerId, monthSelect.value);
-                } catch (err) {
-                    alert('Erro ao alterar status recebido: ' + err.message);
-                    chk.checked = !chk.checked;
-                }
-            }
-        };
-    });
+    const totalExtra = list.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+    tfoot.innerHTML = `
+        <tr style="font-weight: bold; background-color: var(--bg-light);">
+            <td colspan="4" style="text-align: right; padding: 12px; text-transform: uppercase;">Total de Receitas Extras</td>
+            <td style="color: #10b981; padding: 12px;">${formatCurrency(totalExtra)}</td>
+            <td></td>
+        </tr>
+    `;
 
     tbody.querySelectorAll('.edit-btn').forEach(btn => {
         btn.onclick = () => {
@@ -862,12 +867,9 @@ function handleProlaborePrint() {
     receivables.sort((a, b) => new Date(a.transaction_date || '') - new Date(b.transaction_date || ''));
 
     const totalDiscounts = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
-    const totalReceived = receivables.filter(item => item.is_received === true).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
-    const totalPending = receivables.filter(item => item.is_received !== true).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const totalExtraIncome = receivables.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
     const grossProlabore = parseFloat(currentPeriod.gross_amount || 0);
-    const netReceivable = grossProlabore + totalReceived - totalDiscounts;
-
-    const totalExtraIncomeAll = receivables.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const netReceivable = grossProlabore + totalExtraIncome - totalDiscounts;
 
     // Gerar mapeamento amigável de tipos para exibição
     const typeLabels = {
@@ -906,20 +908,17 @@ function handleProlaborePrint() {
     // Montar as linhas de receitas extras
     let receivablesRowsHtml = '';
     if (receivables.length === 0) {
-        receivablesRowsHtml = `<tr><td colspan="6" style="text-align: center; color: #555; padding: 10px;">Nenhuma receita extra lançada nesta competência.</td></tr>`;
+        receivablesRowsHtml = `<tr><td colspan="5" style="text-align: center; color: #555; padding: 10px;">Nenhuma receita extra lançada nesta competência.</td></tr>`;
     } else {
         receivablesRowsHtml = receivables.map(item => {
             const dateStr = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
             const typeLabel = typeLabels[item.type] || item.type;
-            const statusLabel = item.is_received ? 'Recebido' : 'Pendente';
-            const statusStyle = item.is_received ? 'color: #10b981; font-weight: 600;' : 'color: #d97706; font-weight: 600;';
             return `
                 <tr>
                     <td>${dateStr}</td>
                     <td>${typeLabel}</td>
                     <td>${item.category || '-'}</td>
                     <td>${item.description || '-'}</td>
-                    <td style="${statusStyle}">${statusLabel}</td>
                     <td style="font-weight: 600; color: #10b981; text-align: right;">${formatCurrency(item.amount)}</td>
                 </tr>
             `;
@@ -963,20 +962,20 @@ function handleProlaborePrint() {
                         </tr>
                         <tr>
                             <td>Receitas extras</td>
-                            <td>${formatCurrency(totalReceived)}</td>
+                            <td>${formatCurrency(totalExtraIncome)}</td>
                         </tr>
                         <tr>
                             <td>Descontos</td>
                             <td>${formatCurrency(totalDiscounts)}</td>
                         </tr>
                         <tr class="net-row">
-                            <td>Valor líquido a receber</td>
+                            <td>Valor total a receber</td>
                             <td>${formatCurrency(netReceivable)}</td>
                         </tr>
                     </tbody>
                 </table>
                 <p style="font-size: 7.5px; color: #555; font-style: italic; margin-top: 1mm; margin-bottom: 2mm;">
-                    Valor líquido a receber = Pró-labore + Receitas extras - Descontos
+                    Valor total a receber = Pró-labore + Receitas extras - Descontos
                 </p>
             </div>
 
@@ -1021,12 +1020,11 @@ function handleProlaborePrint() {
                 <h2>Receitas Extras</h2>
                 <table class="receivables-table">
                     <colgroup>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
+                        <col style="width: 15%;">
+                        <col style="width: 15%;">
+                        <col style="width: 20%;">
+                        <col style="width: 35%;">
+                        <col style="width: 15%;">
                     </colgroup>
                     <thead>
                         <tr>
@@ -1034,7 +1032,6 @@ function handleProlaborePrint() {
                             <th>Tipo</th>
                             <th>Categoria</th>
                             <th>Descrição</th>
-                            <th>Situação</th>
                             <th style="text-align: right;">Valor</th>
                         </tr>
                     </thead>
@@ -1043,8 +1040,8 @@ function handleProlaborePrint() {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de receitas extras</td>
-                            <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalExtraIncomeAll)}</td>
+                            <td colspan="4" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de receitas extras</td>
+                            <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalExtraIncome)}</td>
                         </tr>
                     </tfoot>
                 </table>

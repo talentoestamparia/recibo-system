@@ -12,6 +12,67 @@
     </style>
 </head>
 <body>
+    <!-- TELA DE LOGIN -->
+    <div id="login-container" class="login-container d-none">
+      <div class="login-card">
+        <div class="login-brand" style="width: 48px; height: 48px; border-radius: var(--radius-sm); background-color: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem; margin: 0 auto 16px auto;">E</div>
+        <h1 style="margin-bottom: 8px; font-size: 1.8rem; font-weight: 700; text-align: center; color: var(--primary-color);">Estamparia</h1>
+        <p style="margin-bottom: 24px; font-size: 0.9rem; text-align: center; color: var(--text-muted);">Acesse o sistema de recibos</p>
+
+        <form id="login-form">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="login-email" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">E-mail</label>
+            <input id="login-email" type="email" autocomplete="username" required placeholder="exemplo@email.com" style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="login-password" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Senha</label>
+            <input id="login-password" type="password" autocomplete="current-password" required placeholder="Digite sua senha" style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
+          </div>
+
+          <div id="login-error-alert" class="login-alert d-none" style="background-color: #fef2f2; border: 1px solid #fee2e2; color: #ef4444; padding: 12px; border-radius: var(--radius-sm); font-size: 0.85rem; text-align: center;">
+              E-mail ou senha incorretos.
+          </div>
+
+          <button id="login-btn-submit" type="submit" class="btn btn-primary btn-block" style="display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 12px; font-weight: 600; cursor: pointer; border: none; border-radius: var(--radius-sm); color: white; background-color: var(--primary-color);">
+              <span>Entrar</span>
+              <div class="spinner d-none" id="login-spinner"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ERRO DE CONFIGURAÇÃO DO SUPABASE -->
+    <div class="login-container d-none" id="supabase-error-container">
+        <div class="login-card" style="border-top: 4px solid #ef4444; max-width: 450px;">
+            <div class="login-header" style="text-align: center; margin-bottom: 24px;">
+                <div style="background-color: #fee2e2; color: #ef4444; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <h2 style="color: #ef4444; font-size: 1.4rem; font-weight: 700; margin-bottom: 8px;">Erro de Configuração</h2>
+                <p style="font-weight: 500; font-size: 0.9rem; color: var(--text-muted);">O cliente Supabase não pôde ser inicializado.</p>
+            </div>
+            <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text-color); background-color: #f9fafb; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px; text-align: left;">
+                <p style="margin-bottom: 8px;"><strong>Causa provável:</strong> As chaves de acesso do Supabase estão vazias ou são inválidas na versão publicada.</p>
+                <p><strong>Como corrigir no GitHub:</strong></p>
+                <ul style="padding-left: 20px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px; list-style-type: disc;">
+                    <li>Acesse o seu repositório no GitHub.</li>
+                    <li>Vá em <strong>Settings</strong> &rarr; <strong>Secrets and variables</strong> &rarr; <strong>Actions</strong>.</li>
+                    <li>Adicione exatamente os segredos (*secrets*):
+                        <ul style="padding-left: 16px; margin-top: 2px; list-style-type: circle;">
+                            <li><code>SUPABASE_URL</code></li>
+                            <li><code>SUPABASE_ANON_KEY</code></li>
+                        </ul>
+                    </li>
+                    <li>Rode o deploy novamente na aba <strong>Actions</strong>.</li>
+                </ul>
+            </div>
+            <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
+                Consulte o arquivo <code>README.md</code> para mais informações.
+            </div>
+        </div>
+    </div>
+
     <div class="app-container d-none" id="app-container">
         <!-- MENU LATERAL -->
         <aside class="sidebar" id="sidebar">
@@ -638,6 +699,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="modal-funcionario-cancel">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="modal-funcionario-save">Salvar</button>
+            </div>
         </div>
     </div>
     
@@ -706,66 +768,6 @@
                 <button type="button" class="btn btn-secondary" id="modal-collision-cancel" style="border: none;">Cancelar</button>
             </div>
         </div>
-    </div>
-    
-    <!-- ERRO DE CONFIGURAÇÃO DO SUPABASE -->
-    <div class="login-container d-none" id="supabase-error-container">
-        <div class="login-card" style="border-top: 4px solid #ef4444; max-width: 450px;">
-            <div class="login-header">
-                <div style="background-color: #fee2e2; color: #ef4444; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <h2 style="color: #ef4444; font-size: 1.4rem; font-weight: 700;">Erro de Configuração</h2>
-                <p style="margin-top: 8px; font-weight: 500;">O cliente Supabase não pôde ser inicializado.</p>
-            </div>
-            <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text-color); background-color: #f9fafb; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px; text-align: left;">
-                <p style="margin-bottom: 8px;"><strong>Causa provável:</strong> As chaves de acesso do Supabase estão vazias ou são inválidas na versão publicada.</p>
-                <p><strong>Como corrigir no GitHub:</strong></p>
-                <ul style="padding-left: 20px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px; list-style-type: disc;">
-                    <li>Acesse o seu repositório no GitHub.</li>
-                    <li>Vá em <strong>Settings</strong> &rarr; <strong>Secrets and variables</strong> &rarr; <strong>Actions</strong>.</li>
-                    <li>Adicione exatamente os segredos (*secrets*):
-                        <ul style="padding-left: 16px; margin-top: 2px; list-style-type: circle;">
-                            <li><code>SUPABASE_URL</code></li>
-                            <li><code>SUPABASE_ANON_KEY</code></li>
-                        </ul>
-                    </li>
-                    <li>Rode o deploy novamente na aba <strong>Actions</strong>.</li>
-                </ul>
-            </div>
-            <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
-                Consulte o arquivo <code>README.md</code> para mais informações.
-            </div>
-        </div>
-    </div>
-
-    <!-- TELA DE LOGIN -->
-    <div id="login-container" class="login-container d-none">
-      <div class="login-card">
-        <h1 style="margin-bottom: 8px; font-size: 1.8rem; font-weight: 700; text-align: center; color: var(--primary-color);">Estamparia</h1>
-        <p style="margin-bottom: 24px; font-size: 0.9rem; text-align: center; color: var(--text-muted);">Acesse o sistema de recibos</p>
-
-        <form id="login-form">
-          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
-            <label for="login-email" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">E-mail</label>
-            <input id="login-email" name="email" type="email" autocomplete="username" required placeholder="exemplo@email.com" style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-            <label for="login-password" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Senha</label>
-            <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Digite sua senha" style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem;">
-          </div>
-
-          <div id="login-error-alert" class="login-alert d-none" style="background-color: #fef2f2; border: 1px solid #fee2e2; color: #ef4444; padding: 12px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px; text-align: center;">
-              E-mail ou senha incorretos.
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block" id="login-btn-submit" style="display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 12px; font-weight: 600; cursor: pointer; border: none; border-radius: var(--radius-sm); color: white; background-color: var(--primary-color);">
-              <span>Entrar</span>
-              <div class="spinner d-none" id="login-spinner"></div>
-          </button>
-        </form>
-      </div>
     </div>
     
     <!-- Supabase CDN Client -->

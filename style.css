@@ -1510,29 +1510,33 @@ a {
 }
 
 #login-container {
-  min-height: 100vh !important;
-  width: 100% !important;
+  position: fixed !important;
+  inset: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 24px !important;
   background: #f3f6f3 !important;
+  z-index: 99999 !important;
   opacity: 1 !important;
   visibility: visible !important;
-  position: relative !important;
-  z-index: 9999 !important;
+}
+
+#login-container.d-none {
+  display: none !important;
 }
 
 .login-card {
   display: block !important;
-  width: 100% !important;
-  max-width: 420px !important;
+  width: min(420px, calc(100vw - 32px)) !important;
+  min-height: 300px !important;
   padding: 32px !important;
-  background: #fff !important;
-  border: 1px solid #dfe5df !important;
-  border-radius: 14px !important;
-  box-shadow: 0 12px 35px rgba(0,0,0,.08) !important;
+  background: white !important;
   color: #1f2937 !important;
+  border: 1px solid #d9e0d9 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.12) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .login-card form {
@@ -1543,6 +1547,7 @@ a {
 
 .login-card input,
 .login-card button {
+  display: block !important;
   width: 100% !important;
   min-height: 44px !important;
 }

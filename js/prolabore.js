@@ -188,6 +188,13 @@ function setupListeners() {
         };
     }
 
+    const btnPdf = document.getElementById('prolabore-btn-pdf');
+    if (btnPdf) {
+        btnPdf.onclick = () => {
+            printProlaboreReport();
+        };
+    }
+
     // Modal Transações
     if (transTypeSelect) {
         transTypeSelect.onchange = () => {
@@ -788,4 +795,62 @@ function renderReceivablesTable(list) {
             }
         };
     });
+}
+
+/**
+ * Converte data da competência (YYYY-MM) para formato amigável (Mês de Ano)
+ * @param {string} monthStr - Ex: '2026-07'
+ * @returns {string} Ex: 'Julho de 2026'
+ */
+function getHumanMonthYear(monthStr) {
+    if (!monthStr) return '';
+    const [year, month] = monthStr.split('-');
+    const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const monthIdx = parseInt(month, 10) - 1;
+    return `${monthNames[monthIdx]} de ${year}`;
+}
+
+/**
+ * Prepara o HTML e dispara a impressão do relatório em PDF
+ */
+function printProlaboreReport() {
+    const monthSelect = document.getElementById('prolabore-month-select');
+    if (!currentPartnerId || !monthSelect || !monthSelect.value) {
+        alert('Selecione um sócio e uma competência para gerar o PDF.');
+        return;
+    }
+
+    const partnerObj = allPartners.find(p => p.id === currentPartnerId);
+    const partnerName = partnerObj ? partnerObj.name : 'Sócio';
+    const competencyLabel = getHumanMonthYear(monthSelect.value);
+    
+    // 1. Preencher cabeçalho exclusivo do PDF
+    const pdfPartner = document.getElementById('pdf-partner-name');
+    const pdfComp = document.getElementById('pdf-competency-name');
+    const pdfDate = document.getElementById('pdf-emission-date');
+    
+    if (pdfPartner) pdfPartner.innerText = partnerName;
+    if (pdfComp) pdfComp.innerText = competencyLabel;
+    if (pdfDate) pdfDate.innerText = new Date().toLocaleDateString('pt-BR');
+
+    // 2. Definir o título temporário do documento para sugestão de nome de arquivo
+    const safePartnerName = partnerName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
+    const [year, month] = monthSelect.value.split('-');
+    const tempTitle = `Prolabore_${safePartnerName}_${month}-${year}`;
+    
+    const originalTitle = document.title;
+    document.title = tempTitle;
+
+    // 3. Registrar ouvinte para restaurar o título após a impressão
+    const restoreTitle = () => {
+        document.title = originalTitle;
+        window.removeEventListener('afterprint', restoreTitle);
+    };
+    window.addEventListener('afterprint', restoreTitle);
+
+    // 4. Chamar a janela de impressão nativa
+    window.print();
 }

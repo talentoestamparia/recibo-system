@@ -29,6 +29,10 @@ function hideAllScreens() {
   if (document.getElementById('login-container')) {
     document.getElementById('login-container').style.display = 'none';
   }
+  document.getElementById('recovery-container')?.classList.add('d-none');
+  if (document.getElementById('recovery-container')) {
+    document.getElementById('recovery-container').style.display = 'none';
+  }
   document.getElementById('app-container')?.classList.add('d-none');
   document.getElementById('supabase-error-container')?.classList.add('d-none');
   if (document.getElementById('supabase-error-container')) {
@@ -46,7 +50,22 @@ function showLoginScreen() {
 
   loginContainer.classList.remove('d-none');
   loginContainer.style.display = 'flex';
+  
+  // Garantir que inicie com o bloco de login ativo e bloco de forgot oculto
+  document.getElementById('login-block')?.classList.remove('d-none');
+  document.getElementById('forgot-block')?.classList.add('d-none');
+  
   console.log('[LOGIN] exibindo tela');
+}
+
+function showRecoveryScreen() {
+  hideAllScreens();
+  const recovery = document.getElementById('recovery-container');
+  if (recovery) {
+    recovery.classList.remove('d-none');
+    recovery.style.display = 'flex';
+    console.log('[RECOVERY] exibindo tela');
+  }
 }
 
 function showApplicationScreen() {
@@ -102,6 +121,30 @@ async function initializeAuthentication() {
       return;
     }
 
+    // Alternar entre login e solicitação de recuperação de senha
+    const forgotLink = document.getElementById('login-forgot-link');
+    const backLink = document.getElementById('forgot-back-link');
+    const loginBlock = document.getElementById('login-block');
+    const forgotBlock = document.getElementById('forgot-block');
+    
+    if (forgotLink && backLink && loginBlock && forgotBlock) {
+        forgotLink.onclick = (e) => {
+            e.preventDefault();
+            loginBlock.classList.add('d-none');
+            forgotBlock.classList.remove('d-none');
+            // Resetar mensagens anteriores
+            document.getElementById('forgot-error-alert')?.classList.add('d-none');
+            document.getElementById('forgot-success-alert')?.classList.add('d-none');
+        };
+        
+        backLink.onclick = (e) => {
+            e.preventDefault();
+            forgotBlock.classList.add('d-none');
+            loginBlock.classList.remove('d-none');
+            document.getElementById('login-error-alert')?.classList.add('d-none');
+        };
+    }
+
     // Configurar comportamento do formulário de login
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -129,8 +172,104 @@ async function initializeAuthentication() {
         };
     }
 
+    // Configurar comportamento do formulário de envio de link de recuperação
+    const forgotForm = document.getElementById('forgot-form');
+    if (forgotForm) {
+        forgotForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            const errorAlert = document.getElementById('forgot-error-alert');
+            const successAlert = document.getElementById('forgot-success-alert');
+            const spinner = document.getElementById('forgot-spinner');
+            const submitBtn = document.getElementById('forgot-btn-submit');
+            
+            errorAlert.classList.add('d-none');
+            successAlert.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            const { resetPassword } = await import('./supabase.js?v=11');
+            const { error } = await resetPassword(email);
+            
+            spinner.classList.add('d-none');
+            submitBtn.disabled = false;
+            
+            if (error) {
+                errorAlert.innerText = error.message || 'Erro ao solicitar recuperação.';
+                errorAlert.classList.remove('d-none');
+            } else {
+                successAlert.classList.remove('d-none');
+                forgotForm.reset();
+            }
+        };
+    }
+
+    // Configurar comportamento do formulário de redefinição de senha
+    const recoveryForm = document.getElementById('recovery-form');
+    if (recoveryForm) {
+        recoveryForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('recovery-password').value;
+            const confirmPassword = document.getElementById('recovery-password-confirm').value;
+            const errorAlert = document.getElementById('recovery-error-alert');
+            const successAlert = document.getElementById('recovery-success-alert');
+            const spinner = document.getElementById('recovery-spinner');
+            const submitBtn = document.getElementById('recovery-btn-submit');
+            
+            errorAlert.classList.add('d-none');
+            successAlert.classList.add('d-none');
+            
+            if (password.length < 8) {
+                errorAlert.innerText = 'A senha deve ter no mínimo 8 caracteres.';
+                errorAlert.classList.remove('d-none');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                errorAlert.innerText = 'As senhas não coincidem.';
+                errorAlert.classList.remove('d-none');
+                return;
+            }
+            
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            const { updatePassword } = await import('./supabase.js?v=11');
+            const { error } = await updatePassword(password);
+            
+            spinner.classList.add('d-none');
+            submitBtn.disabled = false;
+            
+            if (error) {
+                errorAlert.innerText = error.message || 'O link de recuperação está inválido ou expirado.';
+                errorAlert.classList.remove('d-none');
+            } else {
+                successAlert.classList.remove('d-none');
+                setTimeout(async () => {
+                    await logout();
+                    // Limpar parâmetros de busca da URL
+                    const cleanUrl = window.location.origin + window.location.pathname;
+                    window.history.replaceState({}, document.title, cleanUrl);
+                    showLoginScreen();
+                }, 3000);
+            }
+        };
+    }
+
     // Conectar o listener
     onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('[AUTH] modo recovery detectado');
+        showRecoveryScreen();
+        return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'recovery') {
+        showRecoveryScreen();
+        return;
+      }
+
       if (session) {
         console.log('[AUTH] sessão encontrada');
         showApplicationScreen();
@@ -144,6 +283,13 @@ async function initializeAuthentication() {
         console.log('[AUTH] logout concluído');
       }
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'recovery') {
+      console.log('[AUTH] fluxo de recuperação ativo via URL');
+      showRecoveryScreen();
+      return;
+    }
 
     const session = await getSession();
 

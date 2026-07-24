@@ -100,7 +100,9 @@ const requiredElements = [
     'class="login-card"',
     'id="login-form"',
     'id="login-email"',
-    'id="login-password"'
+    'id="login-password"',
+    'id="forgot-form"',
+    'id="recovery-form"'
 ];
 
 requiredElements.forEach(elem => {

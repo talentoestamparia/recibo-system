@@ -73,9 +73,6 @@ export async function login(email, password) {
         password
     });
 
-    console.log("DATA:", data);
-    console.log("ERROR:", error);
-
     if (error) {
       console.error("LOGIN ERROR:", {
         code: error.code,
@@ -126,5 +123,31 @@ export async function getCurrentUser() {
 export function onAuthStateChange(callback) {
     if (!supabase) return { data: { subscription: null } };
     return supabase.auth.onAuthStateChange(callback);
+}
+
+/**
+ * Solicita redefinição de senha por e-mail
+ * @param {string} email
+ * @returns {Promise<{error: any}>}
+ */
+export async function resetPassword(email) {
+    if (!supabase) return { error: new Error('Supabase não configurado.') };
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: 'https://talentoestamparia.github.io/recibo-system/?mode=recovery'
+    });
+    return { error };
+}
+
+/**
+ * Atualiza a senha do usuário autenticado
+ * @param {string} newPassword
+ * @returns {Promise<{error: any}>}
+ */
+export async function updatePassword(newPassword) {
+    if (!supabase) return { error: new Error('Supabase não configurado.') };
+    const { error } = await supabase.auth.updateUser({
+        password: newPassword
+    });
+    return { error };
 }
 

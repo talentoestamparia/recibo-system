@@ -9,7 +9,7 @@ import { initHistory } from './historico.js?v=2';
 import { initVacations } from './ferias.js?v=2';
 import { initReceipt } from './recibo.js?v=2';
 
-import { supabase, login, logout, onAuthStateChange } from './supabase.js?v=2';
+import { supabase, login, logout, getSession, onAuthStateChange } from './supabase.js?v=2';
 
 // Mapeamento de inicializadores de view
 const VIEW_INITIALIZERS = {
@@ -24,7 +24,61 @@ const VIEW_INITIALIZERS = {
 let currentView = 'dashboard';
 let isAppInitialized = false;
 
-document.addEventListener('DOMContentLoaded', async () => {
+function hideAllScreens() {
+  document.getElementById('login-container')?.classList.add('d-none');
+  if (document.getElementById('login-container')) {
+    document.getElementById('login-container').style.display = 'none';
+  }
+  document.getElementById('app-container')?.classList.add('d-none');
+  document.getElementById('supabase-error-container')?.classList.add('d-none');
+  if (document.getElementById('supabase-error-container')) {
+    document.getElementById('supabase-error-container').style.display = 'none';
+  }
+}
+
+function showLoginScreen() {
+  hideAllScreens();
+  const loginContainer = document.getElementById('login-container');
+  if (!loginContainer) {
+    console.error('[LOGIN ERROR] container não encontrado');
+    return;
+  }
+
+  loginContainer.classList.remove('d-none');
+  loginContainer.style.display = 'flex';
+  console.log('[LOGIN] exibindo tela');
+}
+
+function showApplicationScreen() {
+  hideAllScreens();
+  const app = document.getElementById('app-container');
+  if (!app) {
+    console.error('[APP ERROR] container não encontrado');
+    return;
+  }
+
+  app.classList.remove('d-none');
+}
+
+function showConfigurationErrorScreen() {
+  hideAllScreens();
+  const errorScreen = document.getElementById('supabase-error-container');
+  if (errorScreen) {
+    errorScreen.classList.remove('d-none');
+    errorScreen.style.display = 'flex';
+  }
+}
+
+function initializeAppOnce() {
+  if (!isAppInitialized) {
+    initializeApp();
+  }
+}
+
+async function initializeAuthentication() {
+  try {
+    hideAllScreens();
+
     // Configurar ação do botão Sair (logout)
     const logoutBtn = document.getElementById('sidebar-btn-logout');
     if (logoutBtn) {
@@ -34,73 +88,81 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    // Diferenciar produção e desenvolvimento
     const isProduction = location.hostname !== 'localhost' && location.hostname !== '127.0.0.1' && location.protocol !== 'file:';
 
-    // Se o cliente Supabase não estiver inicializado (ex: sem credenciais)
     if (!supabase) {
-        if (isProduction) {
-            console.error('[SUPABASE ERROR] configuração ausente');
-            document.getElementById('supabase-error-container').classList.remove('d-none');
-            document.getElementById('login-container').classList.add('d-none');
-            document.getElementById('app-container').classList.add('d-none');
-        } else {
-            console.log('Supabase não conectado. Executando em modo LocalStorage offline.');
-            document.getElementById('login-container').classList.add('d-none');
-            document.getElementById('app-container').classList.remove('d-none');
-            await initializeApp();
-        }
-        return;
+      if (isProduction) {
+        console.error('[SUPABASE ERROR] configuração ausente');
+        showConfigurationErrorScreen();
+      } else {
+        console.log('Supabase não conectado. Executando em modo LocalStorage offline.');
+        showApplicationScreen();
+        initializeAppOnce();
+      }
+      return;
     }
-    
+
     // Configurar comportamento do formulário de login
     const loginForm = document.getElementById('login-form');
-    loginForm.onsubmit = async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        const errorAlert = document.getElementById('login-error-alert');
-        const spinner = document.getElementById('login-spinner');
-        const submitBtn = document.getElementById('login-btn-submit');
-        
-        errorAlert.classList.add('d-none');
-        spinner.classList.remove('d-none');
-        submitBtn.disabled = true;
-        
-        const { error } = await login(email, password);
-        
-        spinner.classList.add('d-none');
-        submitBtn.disabled = false;
-        
-        if (error) {
-            errorAlert.innerText = 'E-mail ou senha incorretos.';
-            errorAlert.classList.remove('d-none');
-        }
-    };
-    
-    // Observar estado da autenticação
-    onAuthStateChange(async (event, session) => {
-        if (session) {
-            console.log('[AUTH] sessão encontrada');
-            document.getElementById('login-container').classList.add('d-none');
-            document.getElementById('supabase-error-container').classList.add('d-none');
-            document.getElementById('app-container').classList.remove('d-none');
+    if (loginForm) {
+        loginForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorAlert = document.getElementById('login-error-alert');
+            const spinner = document.getElementById('login-spinner');
+            const submitBtn = document.getElementById('login-btn-submit');
             
-            if (!isAppInitialized) {
-                await initializeApp();
+            errorAlert.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            const { error } = await login(email, password);
+            
+            spinner.classList.add('d-none');
+            submitBtn.disabled = false;
+            
+            if (error) {
+                errorAlert.innerText = 'E-mail ou senha incorretos.';
+                errorAlert.classList.remove('d-none');
             }
-        } else {
-            console.log('[AUTH] nenhuma sessão');
-            document.getElementById('app-container').classList.add('d-none');
-            document.getElementById('supabase-error-container').classList.add('d-none');
-            document.getElementById('login-container').classList.remove('d-none');
-        }
+        };
+    }
 
-        if (event === 'SIGNED_OUT') {
-            console.log('[AUTH] logout concluído');
-        }
+    // Conectar o listener
+    onAuthStateChange((event, session) => {
+      if (session) {
+        console.log('[AUTH] sessão encontrada');
+        showApplicationScreen();
+        initializeAppOnce();
+      } else {
+        console.log('[AUTH] nenhuma sessão');
+        showLoginScreen();
+      }
+      
+      if (event === 'SIGNED_OUT') {
+        console.log('[AUTH] logout concluído');
+      }
     });
-});
+
+    const session = await getSession();
+
+    if (!session) {
+      console.log('[AUTH] nenhuma sessão');
+      showLoginScreen();
+      return;
+    }
+
+    console.log('[AUTH] sessão encontrada');
+    showApplicationScreen();
+    initializeAppOnce();
+  } catch (error) {
+    console.error('[AUTH INIT ERROR]', error?.message || error);
+    showConfigurationErrorScreen();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initializeAuthentication);
 
 async function initializeApp() {
     isAppInitialized = true;

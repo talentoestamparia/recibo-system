@@ -653,15 +653,23 @@
                 </header>
                 
                 <div class="filters-panel" style="margin-bottom: 24px;">
-                    <div class="filters-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: flex-end;">
+                    <div class="filters-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: flex-end; gap: 16px;">
+                        <div class="form-group">
+                            <label for="prolabore-partner-select">Selecionar Sócio</label>
+                            <select id="prolabore-partner-select" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);"></select>
+                        </div>
                         <div class="form-group">
                             <label for="prolabore-month-select">Mês de Competência</label>
                             <input type="month" id="prolabore-month-select" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
                         </div>
-                        <div class="form-group" style="display: flex; gap: 12px;">
-                            <button class="btn btn-secondary" id="prolabore-btn-copy-model" style="width: 100%; white-space: nowrap;">
+                        <div class="form-group" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" id="prolabore-btn-copy-model" style="flex: 1; min-width: 160px; white-space: nowrap;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                Usar mês anterior como modelo
+                                Copiar mês anterior
+                            </button>
+                            <button class="btn btn-secondary" id="prolabore-btn-manage-partners" style="flex: 1; min-width: 160px; white-space: nowrap;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                Gerenciar Sócios
                             </button>
                         </div>
                     </div>
@@ -1034,6 +1042,66 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="modal-prolabore-transaction-cancel">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="modal-prolabore-transaction-save">Salvar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL DE GERENCIAMENTO DE SÓCIOS -->
+    <div class="modal-overlay" id="modal-prolabore-partners-list">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Gerenciar Sócios</h3>
+                <button class="modal-close" id="modal-prolabore-partners-list-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- FORMULÁRIO DE CADASTRO/EDIÇÃO DE SÓCIO -->
+                <div style="background-color: #f9fafb; border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px;">
+                    <h4 id="prolabore-partner-form-title" style="margin-bottom: 12px; font-weight: 600; color: var(--primary-color);">Novo Sócio</h4>
+                    <form id="form-prolabore-partner">
+                        <input type="hidden" id="prolabore-partner-id">
+                        <div class="form-grid" style="grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div class="form-group">
+                                <label for="prolabore-partner-name">Nome Completo</label>
+                                <input type="text" id="prolabore-partner-name" required placeholder="Ex: Juliano Henrique..." style="width:100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                            </div>
+                            <div class="form-group">
+                                <label for="prolabore-partner-cpf">CPF (Opcional)</label>
+                                <input type="text" id="prolabore-partner-cpf" placeholder="000.000.000-00" style="width:100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                                <input type="checkbox" id="prolabore-partner-active" checked style="width:16px; height:16px; cursor:pointer;">
+                                <label for="prolabore-partner-active" style="margin: 0; cursor:pointer;">Sócio Ativo</label>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="btn btn-secondary d-none" id="prolabore-partner-btn-cancel-edit" style="padding: 8px 12px;">Cancelar Edição</button>
+                                <button type="submit" class="btn btn-primary" style="padding: 8px 12px;">Salvar Sócio</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- LISTA DE SÓCIOS CADASTRADOS -->
+                <h4 style="margin-bottom: 12px; font-weight: 600; color: var(--primary-color);">Sócios Cadastrados</h4>
+                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                    <table class="custom-table" id="prolabore-partners-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="modal-prolabore-partners-list-close-btn">Fechar</button>
             </div>
         </div>
     </div>

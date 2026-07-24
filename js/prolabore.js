@@ -1,9 +1,13 @@
 /**
- * Controlador de Interface para o Módulo de Pró-labore
+ * Controlador de Interface para o Módulo de Pró-labore (Suporte Multi-sócio)
  */
 import { formatCurrency, formatDateBR } from './utils.js?v=12';
 import { supabase } from './supabase.js?v=12';
 import {
+    getOrCreateDefaultPartners,
+    getProlaborePartners,
+    saveProlaborePartner,
+    deleteProlaborePartner,
     getOrCreateProlaborePeriod,
     updateProlaboreGrossAmount,
     getProlaboreTransactions,
@@ -12,35 +16,73 @@ import {
     copyPreviousMonthTransactions
 } from './db_prolabore.js?v=12';
 
+let currentPartnerId = null;
 let currentPeriod = null;
 let currentTransactions = [];
+let allPartners = [];
 
 /**
  * Inicializa a tela de Pró-labore
  */
 export async function initProlabore() {
+    const partnerSelect = document.getElementById('prolabore-partner-select');
     const monthSelect = document.getElementById('prolabore-month-select');
-    if (!monthSelect) return;
+    if (!partnerSelect || !monthSelect) return;
 
-    // Setar mês atual como padrão se estiver vazio
-    if (!monthSelect.value) {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        monthSelect.value = `${year}-${month}`;
+    try {
+        // 1. Carregar/Inicializar sócios padrão
+        allPartners = await getOrCreateDefaultPartners();
+        
+        // 2. Preencher select de sócios
+        renderPartnersDropdown();
+
+        // 3. Setar sócio inicial se não houver selecionado
+        if (!partnerSelect.value && allPartners.length > 0) {
+            // Preferir o primeiro ativo
+            const firstActive = allPartners.find(p => p.is_active);
+            partnerSelect.value = firstActive ? firstActive.id : allPartners[0].id;
+        }
+        currentPartnerId = partnerSelect.value;
+
+        // 4. Setar mês atual como padrão se estiver vazio
+        if (!monthSelect.value) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            monthSelect.value = `${year}-${month}`;
+        }
+
+        // 5. Configurar todos os listeners
+        setupListeners();
+
+        // 6. Carregar dados do sócio e competência atuais
+        if (currentPartnerId) {
+            await loadProlaboreData(currentPartnerId, monthSelect.value);
+        }
+    } catch (err) {
+        console.error('Erro na inicialização do Pró-labore:', err);
+        alert('Erro ao inicializar o módulo de Pró-labore.');
     }
+}
 
-    // Configurar listeners se ainda não estiverem configurados
-    setupListeners();
+/**
+ * Preenche o select de sócios com a lista atualizada
+ */
+function renderPartnersDropdown() {
+    const partnerSelect = document.getElementById('prolabore-partner-select');
+    if (!partnerSelect) return;
 
-    // Carregar dados iniciais
-    await loadProlaboreData(monthSelect.value);
+    partnerSelect.innerHTML = allPartners.map(p => {
+        const statusLabel = p.is_active ? '' : ' (Inativo)';
+        return `<option value="${p.id}">${p.name}${statusLabel}</option>`;
+    }).join('');
 }
 
 /**
  * Registra os listeners da interface
  */
 function setupListeners() {
+    const partnerSelect = document.getElementById('prolabore-partner-select');
     const monthSelect = document.getElementById('prolabore-month-select');
     const btnEditGross = document.getElementById('prolabore-btn-edit-gross');
     const btnSaveGross = document.getElementById('prolabore-btn-save-gross');
@@ -48,16 +90,36 @@ function setupListeners() {
     const btnAddExpense = document.getElementById('prolabore-btn-add-expense');
     const btnAddReceivable = document.getElementById('prolabore-btn-add-receivable');
     
-    // Modal
+    // Botão de Gerência de Sócios
+    const btnManagePartners = document.getElementById('prolabore-btn-manage-partners');
+
+    // Modais
     const transModal = document.getElementById('modal-prolabore-transaction');
     const transModalClose = document.getElementById('modal-prolabore-transaction-close');
     const transModalCancel = document.getElementById('modal-prolabore-transaction-cancel');
     const transForm = document.getElementById('form-prolabore-transaction');
     const transTypeSelect = document.getElementById('prolabore-trans-type');
 
+    // Modal de Sócios
+    const partnersModal = document.getElementById('modal-prolabore-partners-list');
+    const partnersModalClose = document.getElementById('modal-prolabore-partners-list-close');
+    const partnersModalCloseBtn = document.getElementById('modal-prolabore-partners-list-close-btn');
+    const partnerForm = document.getElementById('form-prolabore-partner');
+    const partnerCancelEdit = document.getElementById('prolabore-partner-btn-cancel-edit');
+
+    // Listeners do topo
+    if (partnerSelect) {
+        partnerSelect.onchange = async () => {
+            currentPartnerId = partnerSelect.value;
+            await loadProlaboreData(currentPartnerId, monthSelect.value);
+        };
+    }
+
     if (monthSelect) {
         monthSelect.onchange = async () => {
-            await loadProlaboreData(monthSelect.value);
+            if (currentPartnerId) {
+                await loadProlaboreData(currentPartnerId, monthSelect.value);
+            }
         };
     }
 
@@ -88,7 +150,7 @@ function setupListeners() {
                     await updateProlaboreGrossAmount(currentPeriod.id, amount);
                     wrapper.classList.add('d-none');
                     display.classList.remove('d-none');
-                    await loadProlaboreData(monthSelect.value);
+                    await loadProlaboreData(currentPartnerId, monthSelect.value);
                 } catch (err) {
                     alert('Erro ao atualizar retirada bruta: ' + err.message);
                 }
@@ -98,7 +160,7 @@ function setupListeners() {
 
     if (btnCopyModel) {
         btnCopyModel.onclick = async () => {
-            if (!currentPeriod) return;
+            if (!currentPeriod || !currentPartnerId) return;
             
             // Obter mês anterior
             const [year, month] = monthSelect.value.split('-').map(Number);
@@ -110,14 +172,14 @@ function setupListeners() {
             }
             const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
 
-            if (confirm(`Deseja copiar todos os lançamentos do mês anterior (${prevMonthStr}) como modelo para este mês?`)) {
+            if (confirm(`Deseja copiar os lançamentos do mês anterior (${prevMonthStr}) como modelo para este sócio?`)) {
                 try {
-                    const copied = await copyPreviousMonthTransactions(currentPeriod.id, prevMonthStr);
+                    const copied = await copyPreviousMonthTransactions(currentPeriod.id, currentPartnerId, prevMonthStr);
                     if (copied) {
                         alert('Lançamentos do mês anterior copiados com sucesso!');
-                        await loadProlaboreData(monthSelect.value);
+                        await loadProlaboreData(currentPartnerId, monthSelect.value);
                     } else {
-                        alert('Nenhum lançamento encontrado no mês anterior para copiar.');
+                        alert('Nenhum lançamento do mês anterior encontrado para este sócio.');
                     }
                 } catch (err) {
                     alert('Erro ao copiar modelo: ' + err.message);
@@ -126,6 +188,7 @@ function setupListeners() {
         };
     }
 
+    // Modal Transações
     if (transTypeSelect) {
         transTypeSelect.onchange = () => {
             toggleModalFormFields(transTypeSelect.value);
@@ -153,20 +216,40 @@ function setupListeners() {
             await saveTransaction();
         };
         
-        // Listener do botão de salvar na footer do modal
         const btnSaveTrans = document.getElementById('modal-prolabore-transaction-save');
         if (btnSaveTrans) {
             btnSaveTrans.onclick = () => {
-                // Dispara a submissão nativa do form para rodar as validações de HTML5
                 transForm.requestSubmit();
             };
         }
     }
+
+    // Modal Sócios
+    if (btnManagePartners) {
+        btnManagePartners.onclick = () => {
+            openPartnersModal();
+        };
+    }
+
+    if (partnersModalClose) partnersModalClose.onclick = closePartnersModal;
+    if (partnersModalCloseBtn) partnersModalCloseBtn.onclick = closePartnersModal;
+
+    if (partnerForm) {
+        partnerForm.onsubmit = async (e) => {
+            e.preventDefault();
+            await savePartner();
+        };
+    }
+
+    if (partnerCancelEdit) {
+        partnerCancelEdit.onclick = () => {
+            resetPartnerForm();
+        };
+    }
 }
 
 /**
- * Alterna a visibilidade dos campos específicos do formulário do modal com base no tipo
- * @param {string} type 
+ * Alterna a visibilidade dos campos específicos de transações
  */
 function toggleModalFormFields(type) {
     const supplierGroup = document.getElementById('prolabore-trans-supplier-group');
@@ -189,8 +272,6 @@ function toggleModalFormFields(type) {
 
 /**
  * Abre o modal de transação
- * @param {string} defaultType - Tipo padrão ('expense' ou 'receivable')
- * @param {Object} [editData] - Dados da transação caso seja edição
  */
 function openTransactionModal(defaultType, editData = null) {
     const modal = document.getElementById('modal-prolabore-transaction');
@@ -213,7 +294,6 @@ function openTransactionModal(defaultType, editData = null) {
     const totalInstInput = document.getElementById('prolabore-trans-total-installments');
     const attachInput = document.getElementById('prolabore-trans-attachment');
 
-    // Configurar data padrão (hoje)
     if (dateInput) {
         const today = new Date();
         const y = today.getFullYear();
@@ -248,16 +328,13 @@ function openTransactionModal(defaultType, editData = null) {
     modal.classList.add('active');
 }
 
-/**
- * Fecha o modal de transação
- */
 function closeTransactionModal() {
     const modal = document.getElementById('modal-prolabore-transaction');
     if (modal) modal.classList.remove('active');
 }
 
 /**
- * Salva a transação do modal
+ * Salva transação
  */
 async function saveTransaction() {
     if (!currentPeriod) return;
@@ -300,35 +377,174 @@ async function saveTransaction() {
         await saveProlaboreTransaction(transData);
         closeTransactionModal();
         const monthSelect = document.getElementById('prolabore-month-select');
-        await loadProlaboreData(monthSelect.value);
+        await loadProlaboreData(currentPartnerId, monthSelect.value);
     } catch (err) {
         alert('Erro ao salvar lançamento: ' + err.message);
     }
 }
 
 /**
- * Carrega e renderiza todos os dados de Pró-labore da competência
+ * Métodos de gerenciamento de sócios
+ */
+function openPartnersModal() {
+    const modal = document.getElementById('modal-prolabore-partners-list');
+    if (!modal) return;
+
+    resetPartnerForm();
+    renderPartnersTable();
+    modal.classList.add('active');
+}
+
+function closePartnersModal() {
+    const modal = document.getElementById('modal-prolabore-partners-list');
+    if (modal) modal.classList.remove('active');
+}
+
+/**
+ * Renderiza a lista de sócios na tabela do modal
+ */
+function renderPartnersTable() {
+    const tbody = document.querySelector('#prolabore-partners-table tbody');
+    if (!tbody) return;
+
+    if (allPartners.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:12px; color:var(--text-muted);">Nenhum sócio cadastrado.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = allPartners.map(p => {
+        const badgeColor = p.is_active ? 'background-color: #d1fae5; color: #065f46;' : 'background-color: #fee2e2; color: #991b1b;';
+        const badgeLabel = p.is_active ? 'Ativo' : 'Inativo';
+        const statusBadge = `<span class="badge" style="${badgeColor} padding: 2px 6px; border-radius: var(--radius-sm); font-size: 0.7rem; font-weight:600;">${badgeLabel}</span>`;
+
+        return `
+            <tr>
+                <td>${p.name}</td>
+                <td>${p.cpf || '-'}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn-action partner-edit-btn" data-id="${p.id}" title="Editar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="btn-action partner-delete-btn" data-id="${p.id}" title="Excluir">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Binds das ações dos sócios
+    tbody.querySelectorAll('.partner-edit-btn').forEach(btn => {
+        btn.onclick = () => {
+            const partner = allPartners.find(p => p.id === btn.dataset.id);
+            if (partner) {
+                document.getElementById('prolabore-partner-id').value = partner.id;
+                document.getElementById('prolabore-partner-name').value = partner.name;
+                document.getElementById('prolabore-partner-cpf').value = partner.cpf || '';
+                document.getElementById('prolabore-partner-active').checked = partner.is_active;
+
+                document.getElementById('prolabore-partner-form-title').innerText = 'Editar Sócio';
+                document.getElementById('prolabore-partner-btn-cancel-edit').classList.remove('d-none');
+            }
+        };
+    });
+
+    tbody.querySelectorAll('.partner-delete-btn').forEach(btn => {
+        btn.onclick = async () => {
+            if (confirm('Tem certeza de que deseja excluir este sócio?')) {
+                try {
+                    await deleteProlaborePartner(btn.dataset.id);
+                    allPartners = await getProlaborePartners();
+                    renderPartnersDropdown();
+                    renderPartnersTable();
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+        };
+    });
+}
+
+/**
+ * Reseta o formulário de sócios
+ */
+function resetPartnerForm() {
+    const form = document.getElementById('form-prolabore-partner');
+    if (form) form.reset();
+
+    const idInput = document.getElementById('prolabore-partner-id');
+    if (idInput) idInput.value = '';
+
+    const title = document.getElementById('prolabore-partner-form-title');
+    if (title) title.innerText = 'Novo Sócio';
+
+    const cancelEdit = document.getElementById('prolabore-partner-btn-cancel-edit');
+    if (cancelEdit) cancelEdit.classList.add('d-none');
+}
+
+/**
+ * Salva um sócio (inserção/edição)
+ */
+async function savePartner() {
+    const id = document.getElementById('prolabore-partner-id').value;
+    const name = document.getElementById('prolabore-partner-name').value;
+    const cpf = document.getElementById('prolabore-partner-cpf').value;
+    const isActive = document.getElementById('prolabore-partner-active').checked;
+
+    const partnerData = {
+        name,
+        cpf: cpf || null,
+        is_active: isActive
+    };
+    if (id) partnerData.id = id;
+
+    try {
+        await saveProlaborePartner(partnerData);
+        resetPartnerForm();
+        
+        // Atualizar lista local
+        allPartners = await getProlaborePartners();
+        renderPartnersDropdown();
+        renderPartnersTable();
+        
+        // Manter o selecionado se possível
+        const partnerSelect = document.getElementById('prolabore-partner-select');
+        if (partnerSelect && id === currentPartnerId) {
+            partnerSelect.value = id;
+        }
+    } catch (err) {
+        alert('Erro ao salvar sócio: ' + err.message);
+    }
+}
+
+/**
+ * Carrega dados de Pró-labore por Sócio e Competência
+ * @param {string} partnerId 
  * @param {string} monthStr - Formato 'YYYY-MM'
  */
-async function loadProlaboreData(monthStr) {
+async function loadProlaboreData(partnerId, monthStr) {
     if (!supabase) {
         alert('Supabase offline. A gestão de Pró-labore está bloqueada temporariamente.');
         return;
     }
+    if (!partnerId) return;
 
     try {
-        // Obter ou criar o período
-        currentPeriod = await getOrCreateProlaborePeriod(monthStr);
+        // Buscar/Criar período associado ao SÓCIO
+        currentPeriod = await getOrCreateProlaborePeriod(partnerId, monthStr);
         if (!currentPeriod) return;
 
         // Obter transações
         currentTransactions = await getProlaboreTransactions(currentPeriod.id);
 
-        // Renderizar a tela
+        // Renderizar
         renderScreen();
     } catch (err) {
         console.error('Erro ao carregar dados do Pró-labore:', err);
-        alert('Falha ao carregar dados do Pró-labore.');
+        alert('Falha ao carregar dados de Pró-labore deste sócio.');
     }
 }
 
@@ -361,7 +577,6 @@ function renderScreen() {
     const netDisplay = document.getElementById('prolabore-net-display');
     if (netDisplay) {
         netDisplay.innerText = formatCurrency(netBalance);
-        // Mudar cor do saldo de acordo com o saldo líquido
         if (netBalance < 0) {
             netDisplay.style.color = '#ef4444';
         } else if (netBalance > 0) {
@@ -378,8 +593,6 @@ function renderScreen() {
 
 /**
  * Mapeia o tipo da transação para um badge amigável
- * @param {string} type 
- * @returns {string} HTML do badge
  */
 function getTypeBadge(type) {
     let color = '';
@@ -413,14 +626,13 @@ function getTypeBadge(type) {
 
 /**
  * Renderiza a tabela de despesas
- * @param {Array} list 
  */
 function renderExpensesTable(list) {
     const tbody = document.querySelector('#prolabore-expenses-table tbody');
     if (!tbody) return;
 
     if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum gasto ou despesa lançado para este mês.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum gasto ou despesa lançado para este sócio neste mês.</td></tr>`;
         return;
     }
 
@@ -430,7 +642,6 @@ function renderExpensesTable(list) {
             ? `${item.installment}/${item.total_installments}` 
             : '-';
             
-        // Se houver anexo/comprovante
         const attachmentHtml = item.attachment_url
             ? `<a href="${item.attachment_url}" target="_blank" title="Ver Comprovante" style="margin-left: 8px; color: var(--primary-color);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
@@ -463,7 +674,6 @@ function renderExpensesTable(list) {
         `;
     }).join('');
 
-    // Bind de ações nas linhas
     tbody.querySelectorAll('.edit-btn').forEach(btn => {
         btn.onclick = () => {
             const trans = currentTransactions.find(t => t.id === btn.dataset.id);
@@ -477,7 +687,7 @@ function renderExpensesTable(list) {
                 try {
                     await deleteProlaboreTransaction(btn.dataset.id);
                     const monthSelect = document.getElementById('prolabore-month-select');
-                    await loadProlaboreData(monthSelect.value);
+                    await loadProlaboreData(currentPartnerId, monthSelect.value);
                 } catch (err) {
                     alert('Erro ao excluir lançamento: ' + err.message);
                 }
@@ -488,14 +698,13 @@ function renderExpensesTable(list) {
 
 /**
  * Renderiza a tabela de recebíveis e receitas
- * @param {Array} list 
  */
 function renderReceivablesTable(list) {
     const tbody = document.querySelector('#prolabore-receivables-table tbody');
     if (!tbody) return;
 
     if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum valor a receber ou receita lançado para este mês.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum valor a receber ou receita lançado para este sócio neste mês.</td></tr>`;
         return;
     }
 
@@ -503,7 +712,6 @@ function renderReceivablesTable(list) {
         const dateBR = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
         const checkedAttribute = item.is_received ? 'checked' : '';
         
-        // Comprovante
         const attachmentHtml = item.attachment_url
             ? `<a href="${item.attachment_url}" target="_blank" title="Ver Comprovante" style="margin-left: 8px; color: var(--primary-color);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
@@ -537,7 +745,6 @@ function renderReceivablesTable(list) {
         `;
     }).join('');
 
-    // Bind de ações nas linhas
     tbody.querySelectorAll('.received-chk').forEach(chk => {
         chk.onchange = async () => {
             const trans = currentTransactions.find(t => t.id === chk.dataset.id);
@@ -552,10 +759,10 @@ function renderReceivablesTable(list) {
                         is_received: chk.checked
                     });
                     const monthSelect = document.getElementById('prolabore-month-select');
-                    await loadProlaboreData(monthSelect.value);
+                    await loadProlaboreData(currentPartnerId, monthSelect.value);
                 } catch (err) {
                     alert('Erro ao alterar status recebido: ' + err.message);
-                    chk.checked = !chk.checked; // Reverter visualmente em caso de falha
+                    chk.checked = !chk.checked;
                 }
             }
         };
@@ -574,7 +781,7 @@ function renderReceivablesTable(list) {
                 try {
                     await deleteProlaboreTransaction(btn.dataset.id);
                     const monthSelect = document.getElementById('prolabore-month-select');
-                    await loadProlaboreData(monthSelect.value);
+                    await loadProlaboreData(currentPartnerId, monthSelect.value);
                 } catch (err) {
                     alert('Erro ao excluir lançamento: ' + err.message);
                 }

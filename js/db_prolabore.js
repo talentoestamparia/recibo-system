@@ -1,14 +1,153 @@
 /**
- * Camada de Acesso a Dados do Supabase para o Módulo de Pró-labore
+ * Camada de Acesso a Dados do Supabase para o Módulo de Pró-labore (Multi-sócio)
  */
-import { supabase } from './supabase.js?v=11';
+import { supabase } from './supabase.js?v=12';
 
 /**
- * Busca ou cria o período de pró-labore para um determinado mês de referência
- * @param {string} monthStr - Mês de referência (ex: '2026-07' ou '2026-07-01')
+ * Cria ou busca os sócios padrão iniciais se a lista estiver vazia
+ * @returns {Promise<Array>} Lista de sócios
+ */
+export async function getOrCreateDefaultPartners() {
+    if (!supabase) return [];
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id;
+    if (!userId) throw new Error('Usuário não autenticado.');
+
+    const { data, error } = await supabase
+        .from('prolabore_partners')
+        .select('*')
+        .eq('user_id', userId)
+        .order('name');
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    if (data.length > 0) return data;
+
+    // Se não houver sócios cadastrados, cria os dois iniciais exigidos
+    const { data: inserted, error: insertError } = await supabase
+        .from('prolabore_partners')
+        .insert([
+            { user_id: userId, name: 'Juliano Henrique da Silva', cpf: '', is_active: true },
+            { user_id: userId, name: 'Luan Henrique da Silva', cpf: '', is_active: true }
+        ])
+        .select();
+
+    if (insertError) {
+        throw new Error(insertError.message);
+    }
+    
+    // Buscar novamente ordenado por nome
+    const { data: refetched } = await supabase
+        .from('prolabore_partners')
+        .select('*')
+        .eq('user_id', userId)
+        .order('name');
+        
+    return refetched || inserted;
+}
+
+/**
+ * Busca todos os sócios cadastrados
+ * @returns {Promise<Array>} Lista de sócios
+ */
+export async function getProlaborePartners() {
+    if (!supabase) return [];
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id;
+    if (!userId) throw new Error('Usuário não autenticado.');
+
+    const { data, error } = await supabase
+        .from('prolabore_partners')
+        .select('*')
+        .eq('user_id', userId)
+        .order('name');
+
+    if (error) {
+        throw new Error(error.message);
+    }
+    return data;
+}
+
+/**
+ * Salva (cria ou edita) um sócio
+ * @param {Object} partnerData - Dados do sócio
+ * @returns {Promise<Object>} Sócio salvo
+ */
+export async function saveProlaborePartner(partnerData) {
+    if (!supabase) return null;
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id;
+    if (!userId) throw new Error('Usuário não autenticado.');
+
+    const payload = {
+        ...partnerData,
+        user_id: userId
+    };
+
+    if (payload.id) {
+        const { data, error } = await supabase
+            .from('prolabore_partners')
+            .update(payload)
+            .eq('id', payload.id)
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    } else {
+        const { data, error } = await supabase
+            .from('prolabore_partners')
+            .insert(payload)
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    }
+}
+
+/**
+ * Exclui um sócio se ele não possuir nenhum período de pró-labore vinculado
+ * @param {string} partnerId - ID do sócio
+ * @returns {Promise<boolean>}
+ */
+export async function deleteProlaborePartner(partnerId) {
+    if (!supabase) return false;
+
+    // Verificar se já possui algum período de pró-labore cadastrado
+    const { count, error: countError } = await supabase
+        .from('prolabore_periods')
+        .select('*', { count: 'exact', head: true })
+        .eq('partner_id', partnerId);
+
+    if (countError) {
+        throw new Error(countError.message);
+    }
+
+    if (count && count > 0) {
+        throw new Error('Não é possível excluir o sócio pois ele possui períodos de pró-labore vinculados. Por favor, apenas desative-o.');
+    }
+
+    const { error } = await supabase
+        .from('prolabore_partners')
+        .delete()
+        .eq('id', partnerId);
+
+    if (error) {
+        throw new Error(error.message);
+    }
+    return true;
+}
+
+/**
+ * Busca ou cria o período de pró-labore para um sócio e mês de referência
+ * @param {string} partnerId - ID do sócio
+ * @param {string} monthStr - Mês de referência (ex: '2026-07')
  * @returns {Promise<Object>} Período de pró-labore
  */
-export async function getOrCreateProlaborePeriod(monthStr) {
+export async function getOrCreateProlaborePeriod(partnerId, monthStr) {
     if (!supabase) return null;
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData?.user?.id;
@@ -21,6 +160,7 @@ export async function getOrCreateProlaborePeriod(monthStr) {
     const { data, error } = await supabase
         .from('prolabore_periods')
         .select('*')
+        .eq('partner_id', partnerId)
         .eq('reference_month', dateStr)
         .maybeSingle();
 
@@ -35,6 +175,7 @@ export async function getOrCreateProlaborePeriod(monthStr) {
         .from('prolabore_periods')
         .insert({
             user_id: userId,
+            partner_id: partnerId,
             reference_month: dateStr,
             gross_amount: 0
         })
@@ -149,12 +290,13 @@ export async function deleteProlaboreTransaction(transactionId) {
 }
 
 /**
- * Copia todas as transações de um período anterior para o atual
+ * Copia todas as transações de um período anterior para o atual para o mesmo sócio
  * @param {string} currentPeriodId - ID do período atual
+ * @param {string} partnerId - ID do sócio atual
  * @param {string} previousMonthStr - Mês de referência anterior (ex: '2026-06')
  * @returns {Promise<boolean>} Retorna true se houver sucesso na cópia
  */
-export async function copyPreviousMonthTransactions(currentPeriodId, previousMonthStr) {
+export async function copyPreviousMonthTransactions(currentPeriodId, partnerId, previousMonthStr) {
     if (!supabase) return false;
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData?.user?.id;
@@ -162,10 +304,11 @@ export async function copyPreviousMonthTransactions(currentPeriodId, previousMon
 
     const prevDateStr = previousMonthStr.substring(0, 7) + '-01';
 
-    // Buscar período anterior
+    // Buscar período anterior DO MESMO SÓCIO
     const { data: prevPeriod, error: periodError } = await supabase
         .from('prolabore_periods')
         .select('id')
+        .eq('partner_id', partnerId)
         .eq('reference_month', prevDateStr)
         .maybeSingle();
 

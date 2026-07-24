@@ -72,6 +72,19 @@ export async function login(email, password) {
         email,
         password
     });
+
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
+
+    if (error) {
+      console.error("LOGIN ERROR:", {
+        code: error.code,
+        status: error.status,
+        message: error.message,
+        name: error.name
+      });
+    }
+
     return { user: data?.user, session: data?.session, error };
 }
 

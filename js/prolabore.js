@@ -825,6 +825,11 @@ function handleProlaborePrint() {
         return;
     }
 
+    if (!currentPeriod) {
+        alert('Nenhum dado de período carregado.');
+        return;
+    }
+
     const partnerName = partnerSelect.options[partnerSelect.selectedIndex]?.text?.trim() || 'Socio';
     const referenceMonth = monthInput.value || '';
 
@@ -839,142 +844,179 @@ function handleProlaborePrint() {
 
     document.title = `Prolabore_${safePartnerName}_${safeMonth}`;
 
-    // Obter valores das métricas atuais da tela
-    const grossVal = document.getElementById('prolabore-gross-display')?.innerText || 'R$ 0,00';
-    const expensesVal = document.getElementById('prolabore-expenses-display')?.innerText || 'R$ 0,00';
-    const receivablesVal = document.getElementById('prolabore-receivables-display')?.innerText || 'R$ 0,00';
-    const netVal = document.getElementById('prolabore-net-display')?.innerText || 'R$ 0,00';
+    // Filtrar e calcular diretamente das variáveis de estado carregadas (currentTransactions / currentPeriod)
+    const expenses = currentTransactions.filter(item => item.type === 'expense' || item.type === 'tax' || item.type === 'withdraw');
+    const receivables = currentTransactions.filter(item => item.type === 'receivable' || item.type === 'income');
 
-    // Obter tabelas clonando apenas as linhas sem botões de ações
-    const expensesRows = Array.from(document.querySelectorAll('#prolabore-expenses-table tbody tr'));
-    const receivablesRows = Array.from(document.querySelectorAll('#prolabore-receivables-table tbody tr'));
+    // Ordenar ambas as listas por data
+    expenses.sort((a, b) => new Date(a.transaction_date || '') - new Date(b.transaction_date || ''));
+    receivables.sort((a, b) => new Date(a.transaction_date || '') - new Date(b.transaction_date || ''));
 
-    // Mapear gastos
-    let expensesHtml = '';
-    if (expensesRows.length === 0 || expensesRows[0].cells.length < 8) {
-        expensesHtml = `<tr><td colspan="7" style="text-align: center; color: #555;">Nenhum gasto ou despesa lançado para este sócio neste mês.</td></tr>`;
+    const totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const totalReceived = receivables.filter(item => item.is_received === true).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const totalPending = receivables.filter(item => item.is_received !== true).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const grossAmount = parseFloat(currentPeriod.gross_amount || 0);
+    const netAmount = grossAmount - totalExpenses + totalReceived;
+
+    const totalReceivablesGeral = totalReceived + totalPending;
+
+    // Gerar mapeamento amigável de tipos para exibição
+    const typeLabels = {
+        expense: 'Despesa',
+        tax: 'Imposto',
+        withdraw: 'Retirada Extra',
+        receivable: 'A Receber',
+        income: 'Receita'
+    };
+
+    // Montar as linhas de despesas
+    let expensesRowsHtml = '';
+    if (expenses.length === 0) {
+        expensesRowsHtml = `<tr><td colspan="7" style="text-align: center; color: #555; padding: 10px;">Nenhuma despesa lançada para este sócio neste mês.</td></tr>`;
     } else {
-        expensesHtml = expensesRows.map(tr => {
-            if (tr.cells.length === 1) {
-                return `<tr><td colspan="7" style="text-align: center; color: #555;">${tr.cells[0].innerText}</td></tr>`;
-            }
+        expensesRowsHtml = expenses.map(item => {
+            const dateStr = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
+            const typeLabel = typeLabels[item.type] || item.type;
+            const installmentText = (item.installment && item.total_installments) 
+                ? `${item.installment}/${item.total_installments}` 
+                : '-';
             return `
                 <tr>
-                    <td>${tr.cells[0].innerText}</td>
-                    <td>${tr.cells[1].innerText}</td>
-                    <td>${tr.cells[2].innerText}</td>
-                    <td>${tr.cells[3].innerText}</td>
-                    <td>${tr.cells[4].innerText}</td>
-                    <td>${tr.cells[5].innerText}</td>
-                    <td style="font-weight: 600; color: #ef4444;">${tr.cells[6].innerText}</td>
+                    <td>${dateStr}</td>
+                    <td>${typeLabel}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.supplier_name || '-'}</td>
+                    <td>${item.description || '-'}</td>
+                    <td>${installmentText}</td>
+                    <td style="font-weight: 600; color: #ef4444; text-align: right;">${formatCurrency(item.amount)}</td>
                 </tr>
             `;
         }).join('');
     }
 
-    // Mapear recebíveis
-    let receivablesHtml = '';
-    if (receivablesRows.length === 0 || receivablesRows[0].cells.length < 7) {
-        receivablesHtml = `<tr><td colspan="6" style="text-align: center; color: #555;">Nenhum valor a receber ou receita lançado para este sócio neste mês.</td></tr>`;
+    // Montar as linhas de receitas e recebíveis
+    let receivablesRowsHtml = '';
+    if (receivables.length === 0) {
+        receivablesRowsHtml = `<tr><td colspan="6" style="text-align: center; color: #555; padding: 10px;">Nenhuma receita ou valor a receber lançado para este sócio neste mês.</td></tr>`;
     } else {
-        receivablesHtml = receivablesRows.map(tr => {
-            if (tr.cells.length === 1) {
-                return `<tr><td colspan="6" style="text-align: center; color: #555;">${tr.cells[0].innerText}</td></tr>`;
-            }
-            const isChkChecked = tr.querySelector('input[type="checkbox"]')?.checked;
-            const statusText = isChkChecked ? 'Sim' : 'Não';
+        receivablesRowsHtml = receivables.map(item => {
+            const dateStr = item.transaction_date ? formatDateBR(item.transaction_date) : '-';
+            const typeLabel = typeLabels[item.type] || item.type;
+            const statusLabel = item.is_received ? 'Recebido' : 'Pendente';
+            const statusStyle = item.is_received ? 'color: #10b981; font-weight: 600;' : 'color: #d97706; font-weight: 600;';
             return `
                 <tr>
-                    <td>${tr.cells[0].innerText}</td>
-                    <td>${tr.cells[1].innerText}</td>
-                    <td>${tr.cells[2].innerText}</td>
-                    <td>${tr.cells[3].innerText}</td>
-                    <td style="font-weight: 600; color: #10b981;">${tr.cells[4].innerText}</td>
-                    <td>${statusText}</td>
+                    <td>${dateStr}</td>
+                    <td>${typeLabel}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.description || '-'}</td>
+                    <td style="${statusStyle}">${statusLabel}</td>
+                    <td style="font-weight: 600; color: #10b981; text-align: right;">${formatCurrency(item.amount)}</td>
                 </tr>
             `;
         }).join('');
     }
 
-    // Construir o HTML completo do relatório
     const competencyLabel = getHumanMonthYear(referenceMonth);
     const todayStr = new Date().toLocaleDateString('pt-BR');
 
     const printReportContainer = document.getElementById('prolabore-print-report');
     if (printReportContainer) {
         printReportContainer.innerHTML = `
+            <!-- CABEÇALHO DO RELATÓRIO -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 20px;">
                 <div>
-                    <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase;">Estamparia JL Ltda - ME</h1>
+                    <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase; font-family: Outfit, Arial, sans-serif;">Estamparia JL Ltda - ME</h1>
                     <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">CNPJ: 25.140.946/0001-84</p>
                     <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">Sarandi-PR</p>
                 </div>
                 <div style="text-align: right;">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase;">Relatório de Pró-labore</h2>
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase; font-family: Outfit, Arial, sans-serif;">Relatório de Pró-labore</h2>
                     <p style="font-size: 0.85rem; margin: 4px 0 0 0; color: #000;"><strong>Sócio:</strong> <span>${partnerName.replace(/\s*\(inativo\)\s*/i, '')}</span></p>
                     <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Competência:</strong> <span>${competencyLabel}</span></p>
                     <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Data de Emissão:</strong> <span>${todayStr}</span></p>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
-                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px;">
-                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Retirada Bruta</span>
-                    <strong style="font-size: 1.2rem; color: #000;">${grossVal}</strong>
-                </div>
-                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px;">
-                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Total de Gastos</span>
-                    <strong style="font-size: 1.2rem; color: #000;">${expensesVal}</strong>
-                </div>
-                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px;">
-                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Valores a Receber / Receitas</span>
-                    <strong style="font-size: 1.2rem; color: #000;">${receivablesVal}</strong>
-                </div>
-                <div style="border: 1px solid #999; padding: 10px; border-radius: 4px; border-left: 3px solid #000;">
-                    <span style="font-size: 0.75rem; color: #555; font-weight: 600; display:block; margin-bottom: 4px;">Saldo Líquido</span>
-                    <strong style="font-size: 1.2rem; color: #000;">${netVal}</strong>
-                </div>
+            <!-- RESUMO FINANCEIRO DETALHADO -->
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000; font-family: Outfit, Arial, sans-serif;">Resumo Financeiro</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <thead>
+                    <tr>
+                        <th style="width: 70%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: left;">Descrição</th>
+                        <th style="width: 30%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: right;">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #999; padding: 6px;">Retirada bruta</td>
+                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600;">${formatCurrency(grossAmount)}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #999; padding: 6px;">Total de despesas</td>
+                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600; color: #ef4444;">${formatCurrency(totalExpenses)}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #999; padding: 6px;">Total de valores a receber (pendentes)</td>
+                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600; color: #d97706;">${formatCurrency(totalPending)}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #999; padding: 6px;">Total de receitas recebidas</td>
+                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(totalReceived)}</td>
+                    </tr>
+                    <tr style="background-color: #f3f4f6;">
+                        <td style="border: 1px solid #999; padding: 8px; font-weight: bold;">Saldo líquido</td>
+                        <td style="border: 1px solid #999; padding: 8px; text-align: right; font-weight: bold; font-size: 1.1rem; color: ${netAmount >= 0 ? 'var(--primary-color)' : '#ef4444'};">${formatCurrency(netAmount)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="font-size: 0.75rem; color: #555; font-style: italic; margin-top: -15px; margin-bottom: 25px;">
+                Fórmula de Cálculo: Saldo líquido = Retirada bruta - Despesas + Receitas recebidas
+            </p>
+
+            <!-- TABELA GASTOS E DESPESAS -->
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000; font-family: Outfit, Arial, sans-serif;">Despesas</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                <thead>
+                    <tr>
+                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Data</th>
+                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Tipo</th>
+                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Categoria</th>
+                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Fornecedor</th>
+                        <th style="background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Descrição</th>
+                        <th style="width:10%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Parcela</th>
+                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: right;">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${expensesRowsHtml}
+                </tbody>
+            </table>
+            <div style="text-align: right; font-weight: bold; margin-bottom: 25px; font-size: 0.95rem;">
+                Total de despesas: <span style="color: #ef4444;">${formatCurrency(totalExpenses)}</span>
             </div>
 
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000;">Gastos e Despesas</h3>
-            <table>
+            <!-- TABELA RECEITAS E VALORES A RECEBER -->
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 30px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000; font-family: Outfit, Arial, sans-serif;">Receitas e Valores a Receber</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                 <thead>
                     <tr>
-                        <th style="width:12%">Data</th>
-                        <th style="width:12%">Tipo</th>
-                        <th style="width:15%">Categoria</th>
-                        <th style="width:15%">Fornecedor</th>
-                        <th>Descrição</th>
-                        <th style="width:10%">Parcela</th>
-                        <th style="width:12%">Valor</th>
+                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Data</th>
+                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Tipo</th>
+                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Categoria</th>
+                        <th style="background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Descrição</th>
+                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Situação</th>
+                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: right;">Valor</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${expensesHtml}
+                    ${receivablesRowsHtml}
                 </tbody>
             </table>
-
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 30px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000;">Valores a Receber e Receitas</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:12%">Data</th>
-                        <th style="width:15%">Tipo</th>
-                        <th style="width:15%">Categoria</th>
-                        <th>Descrição</th>
-                        <th style="width:15%">Valor</th>
-                        <th style="width:15%">Recebido?</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${receivablesHtml}
-                </tbody>
-            </table>
-
-            <div style="display: flex; justify-content: center; margin-top: 60px;">
-                <div style="text-align: center; width: 350px; border-top: 1px solid #000; padding-top: 8px;">
-                    <p style="font-size: 0.9rem; margin: 0; color: #000;">Assinatura do Sócio: ______________________________________</p>
-                </div>
+            <div style="display: flex; justify-content: flex-end; gap: 20px; font-weight: bold; font-size: 0.95rem;">
+                <div>Total recebido: <span style="color: #10b981;">${formatCurrency(totalReceived)}</span></div>
+                <div>Total pendente: <span style="color: #d97706;">${formatCurrency(totalPending)}</span></div>
+                <div style="border-left: 1px solid #999; padding-left: 20px;">Total geral: <span>${formatCurrency(totalReceivablesGeral)}</span></div>
             </div>
         `;
     }

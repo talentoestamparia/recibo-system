@@ -923,100 +923,140 @@ function handleProlaborePrint() {
     const printReportContainer = document.getElementById('prolabore-print-report');
     if (printReportContainer) {
         printReportContainer.innerHTML = `
-            <!-- CABEÇALHO DO RELATÓRIO -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 20px;">
-                <div>
-                    <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase; font-family: Outfit, Arial, sans-serif;">Estamparia JL Ltda - ME</h1>
-                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">CNPJ: 25.140.946/0001-84</p>
-                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;">Sarandi-PR</p>
+            <!-- CABEÇALHO DO RELATÓRIO EM DUAS COLUNAS -->
+            <div class="print-header">
+                <div class="print-header-left">
+                    <h1 style="font-family: Outfit, Arial, sans-serif; font-weight: 700; margin: 0 0 2mm; font-size: 16px;">ESTAMPARIA JL LTDA - ME</h1>
+                    <p style="margin: 0;">CNPJ: 25.140.946/0001-84</p>
+                    <p style="margin: 0;">Sarandi-PR</p>
                 </div>
-                <div style="text-align: right;">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: #000; text-transform: uppercase; font-family: Outfit, Arial, sans-serif;">Relatório de Pró-labore</h2>
-                    <p style="font-size: 0.85rem; margin: 4px 0 0 0; color: #000;"><strong>Sócio:</strong> <span>${partnerName.replace(/\s*\(inativo\)\s*/i, '')}</span></p>
-                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Competência:</strong> <span>${competencyLabel}</span></p>
-                    <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #000;"><strong>Data de Emissão:</strong> <span>${todayStr}</span></p>
+                <div class="print-header-right">
+                    <h1 style="font-family: Outfit, Arial, sans-serif; font-weight: 700; margin: 0 0 2mm; font-size: 16px;">RELATÓRIO DE PRÓ-LABORE</h1>
+                    <p style="margin: 0;"><strong>Sócio:</strong> <span>${partnerName.replace(/\s*\(inativo\)\s*/i, '')}</span></p>
+                    <p style="margin: 0;"><strong>Competência:</strong> <span>${competencyLabel}</span></p>
+                    <p style="margin: 0;"><strong>Data de Emissão:</strong> <span>${todayStr}</span></p>
                 </div>
             </div>
 
-            <!-- RESUMO FINANCEIRO DETALHADO -->
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000; font-family: Outfit, Arial, sans-serif;">Resumo Financeiro</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-                <thead>
-                    <tr>
-                        <th style="width: 70%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: left;">Descrição</th>
-                        <th style="width: 30%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: right;">Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="border: 1px solid #999; padding: 6px;">Retirada bruta</td>
-                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600;">${formatCurrency(grossAmount)}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #999; padding: 6px;">Total de despesas</td>
-                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600; color: #ef4444;">${formatCurrency(totalExpenses)}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #999; padding: 6px;">Total de valores a receber (pendentes)</td>
-                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600; color: #d97706;">${formatCurrency(totalPending)}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #999; padding: 6px;">Total de receitas recebidas</td>
-                        <td style="border: 1px solid #999; padding: 6px; text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(totalReceived)}</td>
-                    </tr>
-                    <tr style="background-color: #f3f4f6;">
-                        <td style="border: 1px solid #999; padding: 8px; font-weight: bold;">Saldo líquido</td>
-                        <td style="border: 1px solid #999; padding: 8px; text-align: right; font-weight: bold; font-size: 1.1rem; color: ${netAmount >= 0 ? 'var(--primary-color)' : '#ef4444'};">${formatCurrency(netAmount)}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p style="font-size: 0.75rem; color: #555; font-style: italic; margin-top: -15px; margin-bottom: 25px;">
-                Fórmula de Cálculo: Saldo líquido = Retirada bruta - Despesas + Receitas recebidas
-            </p>
+            <!-- RESUMO FINANCEIRO EM TABELA COMPACTA -->
+            <div class="print-section financial-summary">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Descrição</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Retirada bruta</td>
+                            <td>${formatCurrency(grossAmount)}</td>
+                        </tr>
+                        <tr>
+                            <td>Total de despesas</td>
+                            <td>${formatCurrency(totalExpenses)}</td>
+                        </tr>
+                        <tr>
+                            <td>Total de valores a receber pendentes</td>
+                            <td>${formatCurrency(totalPending)}</td>
+                        </tr>
+                        <tr>
+                            <td>Total de receitas recebidas</td>
+                            <td>${formatCurrency(totalReceived)}</td>
+                        </tr>
+                        <tr class="net-row">
+                            <td>Saldo líquido</td>
+                            <td>${formatCurrency(netAmount)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 7.5px; color: #555; font-style: italic; margin-top: 1mm; margin-bottom: 2mm;">
+                    Fórmula de cálculo: Saldo líquido = Retirada bruta - Despesas + Receitas recebidas
+                </p>
+            </div>
 
             <!-- TABELA GASTOS E DESPESAS -->
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000; font-family: Outfit, Arial, sans-serif;">Despesas</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-                <thead>
-                    <tr>
-                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Data</th>
-                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Tipo</th>
-                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Categoria</th>
-                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Fornecedor</th>
-                        <th style="background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Descrição</th>
-                        <th style="width:10%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Parcela</th>
-                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: right;">Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${expensesRowsHtml}
-                </tbody>
-            </table>
-            <div style="text-align: right; font-weight: bold; margin-bottom: 25px; font-size: 0.95rem;">
-                Total de despesas: <span style="color: #ef4444;">${formatCurrency(totalExpenses)}</span>
+            <div class="print-section">
+                <h2>Despesas</h2>
+                <table class="expenses-table">
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Fornecedor</th>
+                            <th>Descrição</th>
+                            <th>Parcela</th>
+                            <th style="text-align: right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${expensesRowsHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de despesas</td>
+                            <td style="text-align: right; font-weight: bold; color: #ef4444;">${formatCurrency(totalExpenses)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
 
             <!-- TABELA RECEITAS E VALORES A RECEBER -->
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 30px; border-bottom: 1px solid #999; padding-bottom: 4px; color:#000; font-family: Outfit, Arial, sans-serif;">Receitas e Valores a Receber</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-                <thead>
-                    <tr>
-                        <th style="width:12%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Data</th>
-                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Tipo</th>
-                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Categoria</th>
-                        <th style="background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Descrição</th>
-                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold;">Situação</th>
-                        <th style="width:15%; background-color: #e5e7eb; border: 1px solid #999; padding: 6px; font-weight: bold; text-align: right;">Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${receivablesRowsHtml}
-                </tbody>
-            </table>
-            <div style="display: flex; justify-content: flex-end; gap: 20px; font-weight: bold; font-size: 0.95rem;">
-                <div>Total recebido: <span style="color: #10b981;">${formatCurrency(totalReceived)}</span></div>
-                <div>Total pendente: <span style="color: #d97706;">${formatCurrency(totalPending)}</span></div>
-                <div style="border-left: 1px solid #999; padding-left: 20px;">Total geral: <span>${formatCurrency(totalReceivablesGeral)}</span></div>
+            <div class="print-section">
+                <h2>Receitas e Valores a Receber</h2>
+                <table class="receivables-table">
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Situação</th>
+                            <th style="text-align: right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${receivablesRowsHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total recebido</td>
+                            <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalReceived)}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total pendente</td>
+                            <td style="text-align: right; font-weight: bold; color: #d97706;">${formatCurrency(totalPending)}</td>
+                        </tr>
+                        <tr style="background-color: #f3f4f6;">
+                            <td colspan="5" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total geral</td>
+                            <td style="text-align: right; font-weight: bold;">${formatCurrency(totalReceivablesGeral)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- RODAPÉ SIMPLES -->
+            <div class="print-footer">
+                <div>ESTAMPARIA JL LTDA - ME | CNPJ: 25.140.946/0001-84</div>
+                <div>Emissão em: ${todayStr} ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
             </div>
         `;
     }

@@ -1576,11 +1576,14 @@ a {
 
 @media print {
   @page {
-    size: A4 landscape;
+    size: A4 portrait;
     margin: 10mm;
   }
 
+  html,
   body {
+    width: 210mm;
+    min-height: 297mm;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
@@ -1596,42 +1599,143 @@ a {
   }
 
   #prolabore-print-report {
+    display: block !important;
     width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     color: #000 !important;
     background: #fff !important;
+    font-size: 9px;
+    line-height: 1.2;
+    box-sizing: border-box;
     font-family: Arial, sans-serif !important;
+  }
+
+  .print-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10mm;
+    align-items: start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 4mm;
+    margin-bottom: 5mm;
+  }
+
+  .print-header-left h1,
+  .print-header-right h1 {
+    margin: 0 0 2mm;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .print-header-right {
+    text-align: right;
+  }
+
+  .financial-summary {
+    margin-bottom: 5mm;
+  }
+
+  .financial-summary table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .financial-summary th,
+  .financial-summary td {
+    border: 1px solid #aaa;
+    padding: 2.2mm;
+  }
+
+  .financial-summary th {
+    background: #e5e7eb !important;
+    font-weight: 700;
+  }
+
+  .financial-summary td:last-child,
+  .financial-summary th:last-child {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .financial-summary .net-row {
+    font-weight: 700;
+    font-size: 11px;
+    background: #f3f4f6 !important;
+  }
+
+  .print-section {
+    margin-bottom: 4mm;
+  }
+
+  .print-section h2 {
+    margin: 0 0 2mm;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 1mm;
   }
 
   #prolabore-print-report table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
+    table-layout: fixed;
   }
 
   #prolabore-print-report th,
   #prolabore-print-report td {
-    border: 1px solid #999;
-    padding: 6px;
-    font-size: 0.85rem;
-    color: #000 !important;
-    text-align: left;
+    border: 1px solid #aaa;
+    padding: 1.6mm;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   #prolabore-print-report th {
-    background-color: #e5e7eb !important;
+    background: #e5e7eb !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-weight: bold;
-  }
-
-  #prolabore-print-report thead {
-    display: table-header-group;
+    font-weight: 700;
   }
 
   #prolabore-print-report tr {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  #prolabore-print-report thead {
+    display: table-header-group;
+  }
+
+  #prolabore-print-report tfoot {
+    display: table-row-group;
+  }
+
+  .print-footer {
+    margin-top: 5mm;
+    padding-top: 3mm;
+    border-top: 1px solid #000;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+  }
+
+  /* Larguras proporcionais para colunas das tabelas */
+  .expenses-table col:nth-child(1) { width: 11%; }
+  .expenses-table col:nth-child(2) { width: 11%; }
+  .expenses-table col:nth-child(3) { width: 16%; }
+  .expenses-table col:nth-child(4) { width: 18%; }
+  .expenses-table col:nth-child(5) { width: 27%; }
+  .expenses-table col:nth-child(6) { width: 8%; }
+  .expenses-table col:nth-child(7) { width: 9%; }
+
+  .receivables-table col:nth-child(1) { width: 12%; }
+  .receivables-table col:nth-child(2) { width: 14%; }
+  .receivables-table col:nth-child(3) { width: 18%; }
+  .receivables-table col:nth-child(4) { width: 35%; }
+  .receivables-table col:nth-child(5) { width: 11%; }
+  .receivables-table col:nth-child(6) { width: 10%; }
 }
 
 

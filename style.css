@@ -1575,15 +1575,14 @@ a {
 }
 
 @media print {
-  @page {
+  @page prolabore-page {
     size: A4 portrait;
     margin: 10mm;
   }
 
-  html,
-  body {
-    width: 210mm;
-    min-height: 297mm;
+  body.printing-prolabore {
+    width: 210mm !important;
+    min-height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
@@ -1599,6 +1598,7 @@ a {
   }
 
   #prolabore-print-report {
+    page: prolabore-page;
     display: block !important;
     width: 100% !important;
     max-width: none !important;

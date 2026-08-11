@@ -334,8 +334,8 @@ function setupEventListeners() {
     // Ações do Topo
     const btnClear = document.getElementById('recibo-btn-clear');
     const btnSave = document.getElementById('recibo-btn-save');
-    const btnPrint = document.getElementById('recibo-btn-print');
-    const btnPdf = document.getElementById('recibo-btn-pdf');
+    const btnPrint = document.getElementById('btn-print-receipt') || document.getElementById('recibo-btn-print');
+    const btnPdf = document.getElementById('btn-pdf-receipt') || document.getElementById('recibo-btn-pdf');
     
     if (btnClear) btnClear.onclick = handleClear;
     if (btnSave) btnSave.onclick = handleSave;
@@ -793,39 +793,37 @@ function showPrintTip() {
     }, 10000);
 }
 
-async function handlePrint() {
-    if (!currentReceipt.funcionario_nome) {
-        alert('Por favor, monte o recibo antes de imprimir.');
-        return;
-    }
-    
-    const ok = await testReceiptFitting();
-    if (!ok) return;
-    
+export function openReceiptPrint() {
+    console.log('[PRINT] acionado');
     showPrintTip();
-    
-    setTimeout(() => {
-        window.print();
-        setTimeout(clearPrintFitting, 1000);
-    }, 150);
+    window.print();
 }
 
-async function handlePDF() {
-    if (!currentReceipt.funcionario_nome) {
-        alert('Por favor, monte o recibo antes de salvar em PDF.');
-        return;
-    }
-    
-    const ok = await testReceiptFitting();
-    if (!ok) return;
-    
-    showPrintTip();
-    
-    setTimeout(() => {
-        window.print();
-        setTimeout(clearPrintFitting, 1000);
-    }, 150);
+export function handlePrint(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    openReceiptPrint();
 }
+
+export function handlePDF(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    openReceiptPrint();
+}
+
+// Registro global após o carregamento do DOM
+document.addEventListener('DOMContentLoaded', () => {
+    const printBtn = document.getElementById('btn-print-receipt') || document.getElementById('recibo-btn-print');
+    const pdfBtn = document.getElementById('btn-pdf-receipt') || document.getElementById('recibo-btn-pdf');
+    
+    console.log('[PRINT] botão imprimir:', !!printBtn);
+    console.log('[PRINT] botão pdf:', !!pdfBtn);
+    
+    if (printBtn) {
+        printBtn.addEventListener('click', handlePrint);
+    }
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', handlePDF);
+    }
+});
 
 // Ouvinte de evento customizado para abrir recibo para edição
 window.addEventListener('editReceipt', async (e) => {

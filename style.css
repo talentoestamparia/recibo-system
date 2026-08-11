@@ -479,6 +479,8 @@ a {
 .badge-success { background-color: #d1fae5; color: #065f46; }
 .badge-warning { background-color: #fef3c7; color: #92400e; }
 .badge-danger { background-color: #fee2e2; color: #991b1b; }
+.badge-payroll { background-color: var(--primary-light); color: var(--primary-color); font-weight: 600; }
+.badge-advance { background-color: #fef3c7; color: #92400e; font-weight: 600; }
 .badge-info { background-color: #dbeafe; color: #1e40af; }
 
 .search-box {

@@ -117,8 +117,9 @@ function renderDashboardForSelectedMonth() {
 }
 
 function renderMetrics(employees, filteredReceipts, monthVal, selectedComp) {
-    // 1. Quantidade de recibos emitidos na competência
-    const countReceipts = filteredReceipts.length;
+    // 1. Quantidade de recibos de folha emitidos na competência (evitar dupla contagem com adiantamentos)
+    const payrollReceipts = filteredReceipts.filter(r => (r.tipo_recibo || r.receipt_type || 'payroll') === 'payroll');
+    const countReceipts = payrollReceipts.length;
     const card1Title = document.getElementById('dash-metric-card1-title');
     if (card1Title) {
         card1Title.innerText = `Folha Mensal (${selectedComp})`;
@@ -128,8 +129,8 @@ function renderMetrics(employees, filteredReceipts, monthVal, selectedComp) {
         card1Value.innerText = countReceipts;
     }
     
-    // 2. Total pago no mês (soma dos valores líquidos da competência selecionada)
-    const totalPayroll = filteredReceipts.reduce((sum, r) => sum + (Number(r.valor_liquido) || 0), 0);
+    // 2. Total pago no mês (soma dos valores líquidos da folha da competência selecionada)
+    const totalPayroll = payrollReceipts.reduce((sum, r) => sum + (Number(r.valor_liquido) || 0), 0);
     const payrollEl = document.getElementById('dash-metric-payroll');
     if (payrollEl) {
         payrollEl.innerText = utils.formatCurrency(totalPayroll);
@@ -199,9 +200,12 @@ function renderReceiptsTable(receipts, selectedComp, navigateToView) {
     });
     
     sorted.forEach(receipt => {
+        const isAdvance = (receipt.tipo_recibo === 'advance' || receipt.receipt_type === 'advance');
+        const typeBadge = `<span class="badge ${isAdvance ? 'badge-advance' : 'badge-payroll'}" style="margin-right: 6px; font-size: 0.72rem; padding: 2px 6px;">${isAdvance ? 'Adiantamento' : 'Folha'}</span>`;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${receipt.funcionario_nome}</strong></td>
+            <td>${typeBadge}<strong>${receipt.funcionario_nome}</strong></td>
             <td>${receipt.competencia || selectedComp || 'N/A'}</td>
             <td>${utils.formatDateBR(receipt.data_emissao)}</td>
             <td style="font-weight: bold; color: var(--primary-color);">${utils.formatCurrency(receipt.valor_liquido)}</td>

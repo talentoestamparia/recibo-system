@@ -309,12 +309,16 @@
                     <div class="header-title">
                         <h2>Editor de Recibo</h2>
                         <p>Preencha os valores diretamente na própria folha</p>
-                    </div>
-                </header>
-                
-                <div class="recibo-editor-layout">
+                             <div class="recibo-editor-layout">
                     <!-- Barra de Ferramentas -->
                     <div class="editor-toolbar">
+                        <div class="form-group receipt-type-wrapper" style="margin-bottom: 0;">
+                            <select class="receipt-type-select" id="recibo-type-select" style="padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600; background: var(--card-bg); color: var(--text-color); cursor: pointer; outline: none;">
+                                <option value="payroll" selected>Folha mensal</option>
+                                <option value="advance">Adiantamento</option>
+                            </select>
+                        </div>
+                        
                         <div class="employee-select-wrapper">
                             <input type="text" class="employee-search-input" id="recibo-employee-search" placeholder="🔍 Pesquisar funcionário..." autocomplete="off">
                             <div class="employee-dropdown" id="recibo-employee-dropdown"></div>
@@ -344,7 +348,7 @@
                             
                             <!-- VIA 1 (Esquerda) -->
                             <div class="receipt via-1" data-via="1">
-                                <div class="receipt-title">RECIBO</div>
+                                <div class="receipt-title" id="receipt-title-1">RECIBO</div>
                                 <div class="receipt-header-info">
                                     <div class="info-line">
                                         <span class="info-label">Empregador:</span>
@@ -367,26 +371,43 @@
                                 <div class="receipt-body">
                                     <div class="receipt-body-title">DISCRIMINAÇÃO</div>
                                     
-                                    <div class="receipt-section-header">VENCIMENTOS</div>
-                                    <div class="receipt-rows-container" id="vencimentos-container-1">
-                                        <!-- Inserido via JS -->
+                                    <!-- Bloco de Folha Mensal -->
+                                    <div class="payroll-sections" id="payroll-sections-1">
+                                        <div class="receipt-section-header">VENCIMENTOS</div>
+                                        <div class="receipt-rows-container" id="vencimentos-container-1">
+                                            <!-- Inserido via JS -->
+                                        </div>
+                                        <div class="receipt-add-actions no-print">
+                                            <button class="add-row-btn" id="btn-add-vencimento-1">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                Adicionar vencimento
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="receipt-section-header">DESCONTOS (-)</div>
+                                        <div class="receipt-rows-container" id="descontos-container-1">
+                                            <!-- Inserido via JS -->
+                                        </div>
+                                        <div class="receipt-add-actions no-print">
+                                            <button class="add-row-btn" id="btn-add-desconto-1">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                Adicionar desconto
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="receipt-add-actions no-print">
-                                        <button class="add-row-btn" id="btn-add-vencimento-1">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                            Adicionar vencimento
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="receipt-section-header">DESCONTOS (-)</div>
-                                    <div class="receipt-rows-container" id="descontos-container-1">
-                                        <!-- Inserido via JS -->
-                                    </div>
-                                    <div class="receipt-add-actions no-print">
-                                        <button class="add-row-btn" id="btn-add-desconto-1">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                            Adicionar desconto
-                                        </button>
+
+                                    <!-- Bloco de Adiantamento -->
+                                    <div class="advance-sections" id="advance-sections-1" style="display: none;">
+                                        <div class="receipt-section-header">ADIANTAMENTO</div>
+                                        <div class="receipt-rows-container" id="adiantamentos-container-1">
+                                            <!-- Inserido via JS -->
+                                        </div>
+                                        <div class="receipt-add-actions no-print">
+                                            <button class="add-row-btn" id="btn-add-adiantamento-1">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                Adicionar linha
+                                            </button>
+                                        </div>
                                     </div>
                                     
                                     <div class="receipt-total-row">
@@ -397,7 +418,7 @@
                                 </div>
                                 
                                 <div class="receipt-footer">
-                                    <p class="declaration-text">
+                                    <p class="declaration-text" id="receipt-declaration-text-1">
                                         Declaro que recebi do empregado acima qualificado, o valor líquido de <span class="declaration-val-inline" id="receipt-declaration-val-1">R$ 0,00</span>
                                     </p>
                                     <div class="footer-bottom-grid">
@@ -414,7 +435,7 @@
                             
                             <!-- VIA 2 (Direita) -->
                             <div class="receipt via-2" data-via="2">
-                                <div class="receipt-title">RECIBO</div>
+                                <div class="receipt-title" id="receipt-title-2">RECIBO</div>
                                 <div class="receipt-header-info">
                                     <div class="info-line">
                                         <span class="info-label">Empregador:</span>
@@ -437,26 +458,43 @@
                                 <div class="receipt-body">
                                     <div class="receipt-body-title">DISCRIMINAÇÃO</div>
                                     
-                                    <div class="receipt-section-header">VENCIMENTOS</div>
-                                    <div class="receipt-rows-container" id="vencimentos-container-2">
-                                        <!-- Inserido via JS -->
+                                    <!-- Bloco de Folha Mensal -->
+                                    <div class="payroll-sections" id="payroll-sections-2">
+                                        <div class="receipt-section-header">VENCIMENTOS</div>
+                                        <div class="receipt-rows-container" id="vencimentos-container-2">
+                                            <!-- Inserido via JS -->
+                                        </div>
+                                        <div class="receipt-add-actions no-print">
+                                            <button class="add-row-btn" id="btn-add-vencimento-2">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                Adicionar vencimento
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="receipt-section-header">DESCONTOS (-)</div>
+                                        <div class="receipt-rows-container" id="descontos-container-2">
+                                            <!-- Inserido via JS -->
+                                        </div>
+                                        <div class="receipt-add-actions no-print">
+                                            <button class="add-row-btn" id="btn-add-desconto-2">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                Adicionar desconto
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="receipt-add-actions no-print">
-                                        <button class="add-row-btn" id="btn-add-vencimento-2">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                            Adicionar vencimento
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="receipt-section-header">DESCONTOS (-)</div>
-                                    <div class="receipt-rows-container" id="descontos-container-2">
-                                        <!-- Inserido via JS -->
-                                    </div>
-                                    <div class="receipt-add-actions no-print">
-                                        <button class="add-row-btn" id="btn-add-desconto-2">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                            Adicionar desconto
-                                        </button>
+
+                                    <!-- Bloco de Adiantamento -->
+                                    <div class="advance-sections" id="advance-sections-2" style="display: none;">
+                                        <div class="receipt-section-header">ADIANTAMENTO</div>
+                                        <div class="receipt-rows-container" id="adiantamentos-container-2">
+                                            <!-- Inserido via JS -->
+                                        </div>
+                                        <div class="receipt-add-actions no-print">
+                                            <button class="add-row-btn" id="btn-add-adiantamento-2">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                Adicionar linha
+                                            </button>
+                                        </div>
                                     </div>
                                     
                                     <div class="receipt-total-row">
@@ -467,7 +505,7 @@
                                 </div>
                                 
                                 <div class="receipt-footer">
-                                    <p class="declaration-text">
+                                    <p class="declaration-text" id="receipt-declaration-text-2">
                                         Declaro que recebi do empregado acima qualificado, o valor líquido de <span class="declaration-val-inline" id="receipt-declaration-val-2">R$ 0,00</span>
                                     </p>
                                     <div class="footer-bottom-grid">
@@ -571,6 +609,14 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label for="hist-filter-type">Tipo</label>
+                            <select id="hist-filter-type">
+                                <option value="">Todos</option>
+                                <option value="payroll">Folha</option>
+                                <option value="advance">Adiantamento</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="hist-filter-period">Período de Competência</label>
                             <input type="text" id="hist-filter-period" placeholder="Ex: 06/2026">
                         </div>
@@ -585,6 +631,7 @@
                         <table class="custom-table" id="hist-table">
                             <thead>
                                 <tr>
+                                    <th>Tipo</th>
                                     <th>Funcionário</th>
                                     <th>Competência</th>
                                     <th>Período</th>

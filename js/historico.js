@@ -17,6 +17,10 @@ function setupEventListeners() {
     document.getElementById('hist-filter-month').onchange = filterHistory;
     document.getElementById('hist-filter-year').onchange = filterHistory;
     document.getElementById('hist-filter-period').oninput = filterHistory;
+    const typeFilter = document.getElementById('hist-filter-type');
+    if (typeFilter) {
+        typeFilter.onchange = filterHistory;
+    }
     
     // Botão Limpar Filtros
     document.getElementById('hist-btn-clear-filters').onclick = () => {
@@ -24,6 +28,7 @@ function setupEventListeners() {
         document.getElementById('hist-filter-month').value = '';
         document.getElementById('hist-filter-year').value = '';
         document.getElementById('hist-filter-period').value = '';
+        if (typeFilter) typeFilter.value = '';
         renderHistoryTable(receiptsList);
     };
 }
@@ -40,7 +45,7 @@ function renderHistoryTable(list) {
     if (list.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center; color:var(--text-muted); padding: 30px 0;">
+                <td colspan="7" style="text-align:center; color:var(--text-muted); padding: 30px 0;">
                     Nenhum recibo de pagamento encontrado no histórico.
                 </td>
             </tr>
@@ -49,8 +54,13 @@ function renderHistoryTable(list) {
     }
     
     list.forEach(rec => {
+        const isAdvance = (rec.tipo_recibo === 'advance' || rec.receipt_type === 'advance');
+        const badgeClass = isAdvance ? 'badge-advance' : 'badge-payroll';
+        const badgeText = isAdvance ? 'Adiantamento' : 'Folha';
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
             <td><strong>${rec.funcionario_nome}</strong></td>
             <td>${rec.competencia || 'N/A'}</td>
             <td>${rec.periodo || 'N/A'}</td>
@@ -79,7 +89,8 @@ function renderHistoryTable(list) {
         
         // Excluir
         tr.querySelector('.btn-delete').onclick = async () => {
-            if (confirm(`Deseja excluir permanentemente o recibo de ${rec.funcionario_nome} referente a ${rec.competencia}?`)) {
+            const tipoLabel = isAdvance ? 'de adiantamento' : 'de folha';
+            if (confirm(`Deseja excluir permanentemente o recibo ${tipoLabel} de ${rec.funcionario_nome} referente a ${rec.competencia}?`)) {
                 await db.deleteReceipt(rec.id);
                 await loadHistory();
             }
@@ -94,10 +105,17 @@ function filterHistory() {
     const monthQuery = document.getElementById('hist-filter-month').value;
     const yearQuery = document.getElementById('hist-filter-year').value;
     const periodQuery = document.getElementById('hist-filter-period').value.toLowerCase();
+    const typeQuery = document.getElementById('hist-filter-type')?.value || '';
     
     const filtered = receiptsList.filter(rec => {
+        // Filtrar Tipo
+        if (typeQuery) {
+            const recType = rec.tipo_recibo || rec.receipt_type || 'payroll';
+            if (recType !== typeQuery) return false;
+        }
+        
         // Filtrar Nome
-        const matchesName = rec.funcionario_nome.toLowerCase().includes(nameQuery);
+        const matchesName = (rec.funcionario_nome || '').toLowerCase().includes(nameQuery);
         
         // Filtrar Competência
         let matchesMonth = true;

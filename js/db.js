@@ -407,8 +407,13 @@ export async function saveReceipt(receipt) {
         let list = data ? JSON.parse(data) : [];
         
         if (receipt.id) {
-            // Editando existente
-            list = list.map(r => r.id === receipt.id ? { ...r, ...receipt } : r);
+            // Editando existente ou salvando com ID atribuído
+            const index = list.findIndex(r => r.id === receipt.id);
+            if (index !== -1) {
+                list[index] = { ...list[index], ...receipt };
+            } else {
+                list.push(receipt);
+            }
         } else {
             // Novo
             receipt.id = 'rec_' + Math.random().toString(36).substr(2, 9);

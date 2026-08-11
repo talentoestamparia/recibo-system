@@ -756,6 +756,43 @@ async function testReceiptFitting() {
     return true;
 }
 
+function showPrintTip() {
+    const existing = document.getElementById('print-tip-toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.id = 'print-tip-toast';
+    toast.className = 'no-print';
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        z-index: 99999;
+        font-size: 0.88rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+    `;
+    toast.innerHTML = `
+        <span style="font-size: 1.2rem; flex-shrink: 0;">💡</span>
+        <span>Na tela de impressão, desmarque <strong>"Cabeçalhos e rodapés"</strong> para remover a URL e a numeração da página.</span>
+        <button style="background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; margin-left: 8px;" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+    }, 10000);
+}
+
 async function handlePrint() {
     if (!currentReceipt.funcionario_nome) {
         alert('Por favor, monte o recibo antes de imprimir.');
@@ -765,8 +802,12 @@ async function handlePrint() {
     const ok = await testReceiptFitting();
     if (!ok) return;
     
-    window.print();
-    setTimeout(clearPrintFitting, 1000);
+    showPrintTip();
+    
+    setTimeout(() => {
+        window.print();
+        setTimeout(clearPrintFitting, 1000);
+    }, 150);
 }
 
 async function handlePDF() {
@@ -778,8 +819,12 @@ async function handlePDF() {
     const ok = await testReceiptFitting();
     if (!ok) return;
     
-    window.print();
-    setTimeout(clearPrintFitting, 1000);
+    showPrintTip();
+    
+    setTimeout(() => {
+        window.print();
+        setTimeout(clearPrintFitting, 1000);
+    }, 150);
 }
 
 // Ouvinte de evento customizado para abrir recibo para edição

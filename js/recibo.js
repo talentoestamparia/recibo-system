@@ -839,8 +839,8 @@ export function printReceiptIsolated(e) {
   <title>Recibo</title>
   <style>
     @page {
-      size: A4 portrait;
-      margin: 6mm;
+      size: A4 landscape;
+      margin: 8mm;
     }
 
     *, *::before, *::after {
@@ -863,7 +863,7 @@ export function printReceiptIsolated(e) {
     .receipt-print-pair {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 5mm;
+      column-gap: 8mm;
       width: 100%;
       align-items: start;
       page-break-inside: avoid;
@@ -875,40 +875,40 @@ export function printReceiptIsolated(e) {
       flex-direction: column;
       width: 100%;
       min-width: 0;
-      padding: 2mm 3mm;
+      padding: 3mm 4mm;
       box-sizing: border-box;
       background: #ffffff;
-      font-size: 10.5px;
-      line-height: 1.2;
+      font-size: 11.5px;
+      line-height: 1.25;
       page-break-inside: avoid;
       break-inside: avoid;
     }
 
     .receipt.via-2 {
-      border-left: 1px dashed #666;
-      padding-left: 4mm;
+      border-left: 1px dashed #555;
+      padding-left: 5mm;
     }
 
     .receipt-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       text-align: center;
-      margin-bottom: 2mm;
+      margin-bottom: 2.5mm;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: #000000;
     }
 
     .receipt-header-info {
-      margin-bottom: 2.5mm;
-      font-size: 10px;
-      line-height: 1.25;
+      margin-bottom: 3mm;
+      font-size: 11px;
+      line-height: 1.3;
     }
 
     .info-line {
       display: flex;
       gap: 4px;
-      margin-bottom: 0.6mm;
+      margin-bottom: 0.8mm;
     }
 
     .info-label {
@@ -925,7 +925,7 @@ export function printReceiptIsolated(e) {
       display: flex;
       flex-direction: column;
       flex-grow: 1;
-      margin-bottom: 2.5mm;
+      margin-bottom: 3mm;
     }
 
     .receipt-body-title {
@@ -933,32 +933,32 @@ export function printReceiptIsolated(e) {
       border-bottom: 1px solid #000000;
       font-weight: 700;
       text-align: center;
-      padding: 1mm 2mm;
-      font-size: 10px;
+      padding: 1.2mm 2.5mm;
+      font-size: 11px;
     }
 
     .receipt-section-header {
       border-bottom: 1px solid #000000;
       font-weight: 700;
-      padding: 0.8mm 2mm;
-      font-size: 9.5px;
+      padding: 1mm 2.5mm;
+      font-size: 10.5px;
       background-color: #f9fafb;
     }
 
     .receipt-rows-container {
-      padding: 1mm 2mm;
+      padding: 1.2mm 2.5mm;
     }
 
     .receipt-row {
       display: grid;
-      grid-template-columns: auto minmax(10px, 1fr) auto;
+      grid-template-columns: auto minmax(15px, 1fr) auto;
       align-items: center;
-      column-gap: 4px;
+      column-gap: 5px;
       width: 100%;
       white-space: nowrap;
-      padding: 0.5mm 0;
-      font-size: 10px;
-      line-height: 1.15;
+      padding: 0.6mm 0;
+      font-size: 11px;
+      line-height: 1.2;
     }
 
     .row-description {
@@ -968,7 +968,7 @@ export function printReceiptIsolated(e) {
 
     .row-dots {
       display: block;
-      min-width: 8px;
+      min-width: 10px;
       border-bottom: 1px dotted #000000;
       height: 0;
       margin-bottom: 2px;
@@ -987,9 +987,9 @@ export function printReceiptIsolated(e) {
       align-items: center;
       border-top: 1px solid #000000;
       background-color: #f3f4f6;
-      padding: 1mm 2mm;
+      padding: 1.2mm 2.5mm;
       font-weight: 700;
-      font-size: 10.5px;
+      font-size: 11.5px;
       margin-top: auto;
     }
 
@@ -1010,15 +1010,15 @@ export function printReceiptIsolated(e) {
     }
 
     .receipt-footer {
-      font-size: 9.5px;
-      line-height: 1.25;
+      font-size: 10.5px;
+      line-height: 1.3;
       page-break-inside: avoid;
       break-inside: avoid;
     }
 
     .declaration-text {
-      margin-bottom: 2mm;
-      font-size: 9.5px;
+      margin-bottom: 2.5mm;
+      font-size: 10.5px;
       text-align: justify;
     }
 
@@ -1030,14 +1030,14 @@ export function printReceiptIsolated(e) {
       display: grid;
       grid-template-columns: 1fr 1fr;
       align-items: end;
-      gap: 6mm;
-      margin-top: 2.5mm;
+      gap: 8mm;
+      margin-top: 3mm;
     }
 
     .city-date-wrapper {
       text-align: left;
       white-space: nowrap;
-      font-size: 9.5px;
+      font-size: 10.5px;
     }
 
     .signature-wrapper {
@@ -1050,7 +1050,7 @@ export function printReceiptIsolated(e) {
     }
 
     .signature-name {
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 700;
     }
 

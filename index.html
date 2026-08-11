@@ -222,20 +222,32 @@
                     </div>
                 </header>
                 
+                <!-- Barra de Filtro de Competência do Dashboard -->
+                <div class="dashboard-filter-bar">
+                    <div class="competence-filter-group">
+                        <label for="dash-competencia-select">Competência:</label>
+                        <div class="month-stepper">
+                            <button type="button" class="btn btn-secondary btn-sm btn-month-nav" id="dash-btn-prev-month" title="Mês anterior">‹</button>
+                            <input type="month" id="dash-competencia-select" class="dash-month-input">
+                            <button type="button" class="btn btn-secondary btn-sm btn-month-nav" id="dash-btn-next-month" title="Mês seguinte">›</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Métricas -->
                 <div class="dashboard-metrics">
                     <div class="metric-card">
                         <div class="metric-info">
-                            <h3>Funcionários</h3>
+                            <h3 id="dash-metric-card1-title">Folha Mensal</h3>
                             <p id="dash-metric-employees">0</p>
                         </div>
                         <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         </div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-info">
-                            <h3>Folha Mensal (Líquida)</h3>
+                            <h3>Total pago no mês</h3>
                             <p id="dash-metric-payroll">R$ 0,00</p>
                         </div>
                         <div class="metric-icon">

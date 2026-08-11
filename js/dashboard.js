@@ -5,87 +5,204 @@ import * as db from './db.js';
 import * as utils from './utils.js';
 import { EXCEL_RECEIPTS } from './excel_data.js';
 
+let cachedEmployees = [];
+let cachedReceipts = [];
+let currentNavigateToView = null;
+
 export async function initDashboard(navigateToView) {
-    const employees = await db.getEmployees();
-    const receipts = await db.getReceipts();
-    const settings = await db.getSettings();
+    currentNavigateToView = navigateToView;
     
-    renderMetrics(employees, receipts);
-    renderRecentReceipts(receipts, navigateToView);
-    renderAlerts(employees, receipts);
+    // Inicializar o seletor com o mês atual caso ainda não esteja preenchido
+    const monthInput = document.getElementById('dash-competencia-select');
+    if (monthInput && !monthInput.value) {
+        monthInput.value = getCurrentMonthValue();
+    }
+    
+    // Configurar ouvintes de eventos da barra de competência e botões
+    setupDashboardEventListeners();
+    
+    // Carregar e renderizar os dados
+    await loadAndRenderDashboard();
     
     // Verificar importação pendente do Excel
     checkExcelImport(navigateToView);
-    
-    // Configurar botões da tela
-    document.getElementById('dash-btn-view-history').onclick = () => {
-        navigateToView('historico');
-    };
 }
 
-function renderMetrics(employees, receipts) {
-    // 1. Total de funcionários
-    document.getElementById('dash-metric-employees').innerText = employees.length;
+function getCurrentMonthValue() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    return `${yyyy}-${mm}`;
+}
+
+function getCompetenciaFromMonthValue(monthValue) {
+    if (!monthValue) return '';
+    const parts = monthValue.split('-');
+    if (parts.length !== 2) return '';
+    return `${parts[1]}/${parts[0]}`;
+}
+
+function normalizeCompetencia(comp) {
+    if (!comp) return '';
+    const parts = comp.split('/');
+    if (parts.length === 2) {
+        const m = parts[0].padStart(2, '0');
+        const y = parts[1];
+        return `${m}/${y}`;
+    }
+    return comp;
+}
+
+function setupDashboardEventListeners() {
+    const monthInput = document.getElementById('dash-competencia-select');
+    const btnPrev = document.getElementById('dash-btn-prev-month');
+    const btnNext = document.getElementById('dash-btn-next-month');
+    const btnHistory = document.getElementById('dash-btn-view-history');
     
-    // 2. Total da folha do mês (último mês com recibos)
-    let totalPayroll = 0;
-    if (receipts.length > 0) {
-        // Encontrar a competência mais recente lançada
-        const competencies = receipts.map(r => r.competencia).filter(Boolean);
-        if (competencies.length > 0) {
-            // Classificar competências no formato MM/AAAA (converter para AAAA-MM para ordenação lógica)
-            competencies.sort((a, b) => {
-                const partsA = a.split('/');
-                const partsB = b.split('/');
-                return `${partsB[1]}-${partsB[0]}`.localeCompare(`${partsA[1]}-${partsA[0]}`);
-            });
+    if (monthInput) {
+        monthInput.onchange = () => {
+            renderDashboardForSelectedMonth();
+        };
+    }
+    
+    if (btnPrev && monthInput) {
+        btnPrev.onclick = () => {
+            const currentVal = monthInput.value || getCurrentMonthValue();
+            const [y, m] = currentVal.split('-').map(Number);
+            const prevDate = new Date(y, m - 2, 1);
+            const prevY = prevDate.getFullYear();
+            const prevM = String(prevDate.getMonth() + 1).padStart(2, '0');
+            monthInput.value = `${prevY}-${prevM}`;
+            renderDashboardForSelectedMonth();
+        };
+    }
+    
+    if (btnNext && monthInput) {
+        btnNext.onclick = () => {
+            const currentVal = monthInput.value || getCurrentMonthValue();
+            const [y, m] = currentVal.split('-').map(Number);
+            const nextDate = new Date(y, m, 1);
+            const nextY = nextDate.getFullYear();
+            const nextM = String(nextDate.getMonth() + 1).padStart(2, '0');
+            monthInput.value = `${nextY}-${nextM}`;
+            renderDashboardForSelectedMonth();
+        };
+    }
+    
+    if (btnHistory && currentNavigateToView) {
+        btnHistory.onclick = () => {
+            currentNavigateToView('historico');
+        };
+    }
+}
+
+async function loadAndRenderDashboard() {
+    cachedEmployees = await db.getEmployees();
+    cachedReceipts = await db.getReceipts();
+    
+    renderDashboardForSelectedMonth();
+    renderAlerts(cachedEmployees, cachedReceipts);
+}
+
+function renderDashboardForSelectedMonth() {
+    const monthInput = document.getElementById('dash-competencia-select');
+    const monthVal = monthInput?.value || getCurrentMonthValue();
+    const selectedComp = getCompetenciaFromMonthValue(monthVal);
+    
+    // Filtrar recibos pertencentes à competência selecionada
+    const filteredReceipts = cachedReceipts.filter(r => normalizeCompetencia(r.competencia) === selectedComp);
+    
+    renderMetrics(cachedEmployees, filteredReceipts, monthVal, selectedComp);
+    renderReceiptsTable(filteredReceipts, selectedComp, currentNavigateToView);
+}
+
+function renderMetrics(employees, filteredReceipts, monthVal, selectedComp) {
+    // 1. Quantidade de recibos emitidos na competência
+    const countReceipts = filteredReceipts.length;
+    const card1Title = document.getElementById('dash-metric-card1-title');
+    if (card1Title) {
+        card1Title.innerText = `Folha Mensal (${selectedComp})`;
+    }
+    const card1Value = document.getElementById('dash-metric-employees');
+    if (card1Value) {
+        card1Value.innerText = countReceipts;
+    }
+    
+    // 2. Total pago no mês (soma dos valores líquidos da competência selecionada)
+    const totalPayroll = filteredReceipts.reduce((sum, r) => sum + (Number(r.valor_liquido) || 0), 0);
+    const payrollEl = document.getElementById('dash-metric-payroll');
+    if (payrollEl) {
+        payrollEl.innerText = utils.formatCurrency(totalPayroll);
+    }
+    
+    // 3. Em Férias durante a competência selecionada
+    const [yStr, mStr] = monthVal.split('-');
+    const year = Number(yStr);
+    const month = Number(mStr);
+    const employeesOnVacation = countEmployeesOnVacationForMonth(employees, year, month);
+    
+    const vacationEl = document.getElementById('dash-metric-vacation');
+    if (vacationEl) {
+        vacationEl.innerText = employeesOnVacation;
+    }
+}
+
+function countEmployeesOnVacationForMonth(employees, year, month) {
+    // Definir intervalo da competência (primeiro e último dia do mês)
+    const monthStart = new Date(year, month - 1, 1, 0, 0, 0);
+    const monthEnd = new Date(year, month, 0, 23, 59, 59);
+    
+    return employees.filter(emp => {
+        if (emp.ferias_data_prevista) {
+            const start = new Date(emp.ferias_data_prevista + 'T00:00:00');
+            const days = parseInt(emp.ferias_dias) || 30;
+            const end = new Date(start.getTime() + (days - 1) * 24 * 60 * 60 * 1000);
             
-            const latestCompetency = competencies[0];
-            const latestReceipts = receipts.filter(r => r.competencia === latestCompetency);
-            totalPayroll = latestReceipts.reduce((sum, r) => sum + r.valor_liquido, 0);
-            
-            // Atualizar legenda da métrica de folha
-            const label = document.querySelector('.metric-info h3');
-            if (label) {
-                label.innerText = `Folha Mensal (${latestCompetency})`;
+            const overlaps = (start <= monthEnd && end >= monthStart);
+            const validStatus = ['andamento', 'programada', 'concluida', 'pendente'].includes(emp.ferias_status);
+            if (overlaps && validStatus) {
+                return true;
             }
         }
-    } else {
-        const label = document.querySelector('.metric-info h3');
-        if (label) {
-            label.innerText = 'Folha Mensal';
+        
+        // Se status estiver 'andamento' e a competência for o mês atual do sistema
+        const now = new Date();
+        if (emp.ferias_status === 'andamento' && now.getFullYear() === year && (now.getMonth() + 1) === month) {
+            return true;
         }
-    }
-    document.getElementById('dash-metric-payroll').innerText = utils.formatCurrency(totalPayroll);
-    
-    // 3. Em Férias (status = 'andamento')
-    const employeesOnVacation = employees.filter(e => e.ferias_status === 'andamento').length;
-    document.getElementById('dash-metric-vacation').innerText = employeesOnVacation;
+        
+        return false;
+    }).length;
 }
 
-function renderRecentReceipts(receipts, navigateToView) {
+function renderReceiptsTable(receipts, selectedComp, navigateToView) {
     const tbody = document.querySelector('#dash-table-receipts tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     
-    // Pegar no máximo os 5 mais recentes
-    const recent = receipts.slice(0, 5);
-    
-    if (recent.length === 0) {
+    if (receipts.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" style="text-align:center; color:var(--text-muted); padding: 30px 0;">
-                    Nenhum recibo emitido até o momento.
+                    Nenhum recibo emitido para a competência <strong>${selectedComp}</strong>.
                 </td>
             </tr>
         `;
         return;
     }
     
-    recent.forEach(receipt => {
+    // Ordenar do mais recente para o mais antigo por data de emissão ou criação
+    const sorted = [...receipts].sort((a, b) => {
+        const dateA = a.data_emissao ? new Date(a.data_emissao) : (a.created_at ? new Date(a.created_at) : new Date(0));
+        const dateB = b.data_emissao ? new Date(b.data_emissao) : (b.created_at ? new Date(b.created_at) : new Date(0));
+        return dateB - dateA;
+    });
+    
+    sorted.forEach(receipt => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${receipt.funcionario_nome}</strong></td>
-            <td>${receipt.competencia || 'N/A'}</td>
+            <td>${receipt.competencia || selectedComp || 'N/A'}</td>
             <td>${utils.formatDateBR(receipt.data_emissao)}</td>
             <td style="font-weight: bold; color: var(--primary-color);">${utils.formatCurrency(receipt.valor_liquido)}</td>
             <td>
@@ -96,7 +213,9 @@ function renderRecentReceipts(receipts, navigateToView) {
         tr.querySelector('.btn-open-rec').onclick = () => {
             // Disparar evento para abrir recibo específico
             window.dispatchEvent(new CustomEvent('editReceipt', { detail: receipt.id }));
-            navigateToView('recibo');
+            if (navigateToView) {
+                navigateToView('recibo');
+            }
         };
         
         tbody.appendChild(tr);
@@ -105,6 +224,7 @@ function renderRecentReceipts(receipts, navigateToView) {
 
 function renderAlerts(employees, receipts) {
     const container = document.getElementById('dash-alerts-container');
+    if (!container) return;
     container.innerHTML = '';
     
     const alerts = [];
@@ -128,6 +248,11 @@ function renderAlerts(employees, receipts) {
                 alerts.push({
                     type: 'warning',
                     text: `Férias programadas de <strong>${emp.nome}</strong> em <strong>${daysLeft} dias</strong>.`
+                });
+            } else if (emp.ferias_status === 'andamento') {
+                alerts.push({
+                    type: 'info',
+                    text: `<strong>${emp.nome}</strong> está em período de férias atualmente.`
                 });
             }
         }
@@ -232,14 +357,13 @@ export async function checkExcelImport(navigateToView) {
                     // Criar funcionário
                     emp = await db.saveEmployee({
                         nome: rec.funcionario_nome,
-                        cargo: 'Auxiliar de Produção', // cargo padrão
+                        cargo: 'Auxiliar de Produção',
                         cpf: '000.000.000-00',
                         salario_base: salario_base,
                         data_admissao: '2026-01-01',
                         ferias_status: 'pendente',
                         observacoes: 'Cadastrado automaticamente via importação de planilha Excel.'
                     });
-                    // Atualizar lista local de funcionários para evitar duplicar na mesma rodada
                     employees.push(emp);
                 }
                 
@@ -249,10 +373,8 @@ export async function checkExcelImport(navigateToView) {
             }
             
             alert('Importação concluída com sucesso!');
-            // Esconder o banner
             const banner = document.getElementById('import-excel-banner');
             if (banner) banner.style.display = 'none';
-            // Ir para o Histórico para que o usuário veja os recibos importados imediatamente
             navigateToView('historico');
         };
         

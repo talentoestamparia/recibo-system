@@ -1327,266 +1327,21 @@ a {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-/* ==========================================================================
-   ESTILOS DE IMPRESSÃO (@media print)
-   ========================================================================== */
-@page {
-  size: A4 landscape;
-  margin: 5mm;
-}
-
-@media print {
-  html,
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    background: white !important;
-  }
-
-  body {
-    display: block !important;
-  }
-
-  body > * {
-    display: none !important;
-  }
-
-  #print-area {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4mm;
-    width: 100% !important;
-    max-width: 287mm !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    position: static !important;
-    overflow: visible !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    page-break-after: avoid !important;
-    break-after: avoid-page !important;
-  }
-
-  .receipt {
-    width: auto !important;
-    min-width: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 3mm 4mm !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    border: none !important;
-    box-shadow: none !important;
-    background-color: white !important;
-  }
-
-  .receipt * {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .receipt-title {
-    margin: 0 0 3mm !important;
-    font-size: 23px !important;
-  }
-
-  .receipt-header-info {
-    margin-bottom: 3mm !important;
-    line-height: 1.15 !important;
-  }
-
-  .info-line {
-    margin: 0 0 0.7mm !important;
-  }
-
-  .receipt-row {
-    display: grid !important;
-    grid-template-columns: auto minmax(20px, 1fr) auto !important;
-    align-items: center !important;
-    column-gap: 6px !important;
-    width: 100% !important;
-    white-space: nowrap !important;
-    padding: 0.6mm 0 !important;
-    line-height: 1.05 !important;
-  }
-
-  .row-description,
-  .receipt-description {
-    min-width: 0 !important;
-    white-space: nowrap !important;
-  }
-
-  .row-dots,
-  .receipt-dots {
-    display: block !important;
-    min-width: 15px !important;
-    border-bottom: 2px dotted #000 !important;
-    height: 0 !important;
-  }
-
-  .row-value-wrapper {
-    display: flex !important;
-    align-items: center !important;
-    gap: 2px !important;
-    white-space: nowrap !important;
-  }
-
-  .row-value-wrapper > span,
-  .row-val-input,
-  .receipt-currency,
-  .receipt-value {
-    display: block !important;
-    white-space: nowrap !important;
-    text-align: right !important;
-    font-weight: 700 !important;
-  }
-
-  .row-val-input,
-  .receipt-value {
-    min-width: 55px !important;
-  }
-
-  .receipt-body-title,
-  .receipt-section-header {
-    padding: 1.2mm 2mm !important;
-  }
-
-  .receipt-footer {
-    position: static !important;
-    margin-top: 3mm !important;
-    break-inside: avoid !important;
-  }
-
-  .declaration-text {
-    margin-bottom: 3mm !important;
-  }
-
-  .signature-area,
-  .footer-bottom-grid {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    align-items: end !important;
-    gap: 12mm !important;
-    margin-top: 2mm !important;
-  }
-
-  .receipt-date,
-  .city-date-wrapper {
-    text-align: left !important;
-    white-space: nowrap !important;
-  }
-
-  .employee-signature,
-  .signature-wrapper {
-    text-align: center !important;
-  }
-
-  /* Classes compactas */
-  .receipt.compact {
-    font-size: 9.5px !important;
-  }
-
-  .receipt.compact .receipt-row {
-    padding: 0.5mm 0 !important;
-  }
-
-  .receipt.very-compact {
-    font-size: 8.5px !important;
-  }
-
-  .receipt.very-compact .receipt-title {
-    font-size: 21px !important;
-    margin-bottom: 3mm !important;
-  }
-
-  .receipt.very-compact .receipt-row {
-    padding: 0.35mm 0 !important;
-  }
-
-  .no-print,
-  button,
-  nav,
-  aside,
-  header,
-  footer:not(.receipt-footer),
-  .recurrent-indicator,
-  .recurring-indicator,
-  .row-delete-btn,
-  .add-row {
-    display: none !important;
-  }
-
-  .receipt + .receipt {
-    border-left: none !important;
-    border-left: 1px dashed #555 !important;
-  }
-
-  /* Linhas e bordas do recibo na impressão */
-  .receipt-body {
-    border: 1px solid black !important;
-  }
-
-  .receipt-body-title {
-    background-color: #e5e7eb !important;
-    border-bottom: 1px solid black !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .receipt-section-header {
-    border-bottom: 1px solid black !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .row-dots {
-    border-bottom: 2px dotted #000 !important;
-  }
-
-  .receipt-total-row {
-    border-top: 1px solid black !important;
-    background-color: #f3f4f6 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    margin-top: auto;
-  }
-
-  .total-dots {
-    border-bottom: 2px dotted black !important;
-  }
-
-  .signature-line {
-    border-top: 1px solid black !important;
-  }
-}
-
 /* --- Estilos da Tela de Login e Utilitários --- */
 .d-none {
     display: none !important;
 }
 
 #login-container {
-  position: fixed !important;
-  inset: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #f3f6f3 !important;
-  z-index: 99999 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f6f3;
+  z-index: 99999;
+  opacity: 1;
+  visibility: visible;
 }
 
 #login-container.d-none {
@@ -1594,30 +1349,30 @@ a {
 }
 
 .login-card {
-  display: block !important;
-  width: min(420px, calc(100vw - 32px)) !important;
-  min-height: 300px !important;
-  padding: 32px !important;
-  background: white !important;
-  color: #1f2937 !important;
-  border: 1px solid #d9e0d9 !important;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,.12) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  display: block;
+  width: min(420px, calc(100vw - 32px));
+  min-height: 300px;
+  padding: 32px;
+  background: white;
+  color: #1f2937;
+  border: 1px solid #d9e0d9;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.12);
+  opacity: 1;
+  visibility: visible;
 }
 
 .login-card form {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .login-card input,
 .login-card button {
-  display: block !important;
-  width: 100% !important;
-  min-height: 44px !important;
+  display: block;
+  width: 100%;
+  min-height: 44px;
 }
 
 /* Spinner para loading */
@@ -1637,28 +1392,369 @@ a {
     }
 }
 
-/* --- Estilos do Contêiner de Impressão de Pró-labore --- */
 .prolabore-print-report {
     display: none;
 }
 
+/* ==========================================================================
+   ESTILOS DE IMPRESSÃO (@media print)
+   ========================================================================== */
+@page {
+  size: A4 landscape;
+  margin: 5mm;
+}
+
+@page prolabore-page {
+  size: A4 portrait;
+  margin: 8mm;
+}
+
 @media print {
-  @page prolabore-page {
-    size: A4 portrait;
-    margin: 10mm;
+  /* Reset geral */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
   }
 
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Ocultar tudo no body por padrão */
+  body > * {
+    display: none !important;
+  }
+
+  /* Ocultar explicitamente todos os elementos de tela e sobreposições */
+  #login-container,
+  #recovery-container,
+  .login-container,
+  .login-card,
+  .modal-overlay,
+  .connection-warning-banner,
+  .sidebar,
+  .sidebar-header,
+  .sidebar-menu,
+  .sidebar-footer,
+  .main-header,
+  .editor-toolbar,
+  .employee-select-wrapper,
+  .receipt-type-wrapper,
+  .receipt-add-actions,
+  .filters-panel,
+  .dashboard-panel,
+  .dashboard-grid,
+  .dashboard-filter-bar,
+  .vacation-boards,
+  .import-banner,
+  .no-print,
+  button,
+  .row-delete-btn,
+  .recurrent-indicator,
+  .spinner {
+    display: none !important;
+    visibility: hidden !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    page-break-before: auto !important;
+    break-before: auto !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  /* ----------------------------------------------------
+     1. IMPRESSÃO DE RECIBOS (FOLHA MENSAL E ADIANTAMENTO)
+     ---------------------------------------------------- */
+  body:not(.printing-prolabore) > .app-container,
+  body:not(.printing-prolabore) > .app-container > .main-content,
+  body:not(.printing-prolabore) > .app-container > .main-content > #view-recibo,
+  body:not(.printing-prolabore) > .app-container > .main-content > #view-recibo > .recibo-editor-layout,
+  body:not(.printing-prolabore) > .app-container > .main-content > #view-recibo > .recibo-editor-layout > .receipts-workspace {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Grid de 2 vias do recibo */
+  body > #print-area,
+  .receipts-workspace #print-area {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 4mm !important;
+    width: 100% !important;
+    max-width: 287mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    position: static !important;
+    overflow: visible !important;
+    page-break-before: avoid !important;
+    break-before: avoid-page !important;
+    page-break-after: avoid !important;
+    break-after: avoid-page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .receipt {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 3mm 4mm !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .receipt + .receipt {
+    border-left: 1px dashed #555 !important;
+  }
+
+  .receipt-title {
+    margin: 0 0 2.5mm !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    color: #000000 !important;
+  }
+
+  .receipt-header-info {
+    margin-bottom: 2.5mm !important;
+    line-height: 1.15 !important;
+    font-size: 0.85rem !important;
+  }
+
+  .info-line {
+    display: flex !important;
+    margin: 0 0 0.6mm !important;
+    gap: 4px !important;
+  }
+
+  .info-label {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  .info-val {
+    color: #000000 !important;
+  }
+
+  .receipt-body {
+    border: 1px solid black !important;
+    margin-bottom: 0 !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .receipt-body-title {
+    background-color: #e5e7eb !important;
+    border-bottom: 1px solid black !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    padding: 1mm 2mm !important;
+    font-size: 0.8rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .receipt-section-header {
+    border-bottom: 1px solid black !important;
+    font-weight: 700 !important;
+    padding: 0.8mm 2mm !important;
+    font-size: 0.75rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .receipt-rows-container {
+    padding: 1mm 2mm !important;
+  }
+
+  .receipt-row {
+    display: grid !important;
+    grid-template-columns: auto minmax(15px, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 4px !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    padding: 0.5mm 0 !important;
+    line-height: 1.1 !important;
+    font-size: 0.8rem !important;
+  }
+
+  .row-description {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .row-dots {
+    display: block !important;
+    min-width: 10px !important;
+    border-bottom: 2px dotted #000 !important;
+    height: 0 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .row-value-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    white-space: nowrap !important;
+    font-weight: 700 !important;
+  }
+
+  .receipt-total-row {
+    display: flex !important;
+    align-items: center !important;
+    border-top: 1px solid black !important;
+    background-color: #f3f4f6 !important;
+    padding: 1mm 2mm !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    margin-top: auto !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .total-label {
+    font-weight: 700 !important;
+  }
+
+  .total-dots {
+    flex: 1 !important;
+    margin: 0 4px !important;
+    border-bottom: 2px dotted black !important;
+    height: 0 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .total-val {
+    font-weight: 700 !important;
+  }
+
+  .receipt-footer {
+    position: static !important;
+    margin-top: 2.5mm !important;
+    font-size: 0.8rem !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .declaration-text {
+    margin-bottom: 2mm !important;
+    line-height: 1.25 !important;
+    font-size: 0.78rem !important;
+  }
+
+  .declaration-val-inline {
+    font-weight: 700 !important;
+  }
+
+  .footer-bottom-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    align-items: end !important;
+    gap: 8mm !important;
+    margin-top: 2mm !important;
+  }
+
+  .city-date-wrapper {
+    text-align: left !important;
+    white-space: nowrap !important;
+    font-size: 0.78rem !important;
+  }
+
+  .signature-wrapper {
+    text-align: center !important;
+  }
+
+  .signature-line {
+    border-top: 1px solid black !important;
+    margin-bottom: 1.5mm !important;
+  }
+
+  .signature-name {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* Classes compactas caso haja muitas linhas */
+  .receipt.compact {
+    font-size: 9.5px !important;
+  }
+
+  .receipt.compact .receipt-row {
+    padding: 0.4mm 0 !important;
+  }
+
+  .receipt.very-compact {
+    font-size: 8.5px !important;
+  }
+
+  .receipt.very-compact .receipt-title {
+    font-size: 18px !important;
+    margin-bottom: 2mm !important;
+  }
+
+  .receipt.very-compact .receipt-row {
+    padding: 0.3mm 0 !important;
+  }
+
+  /* ----------------------------------------------------
+     2. IMPRESSÃO DO RELATÓRIO DE PRÓ-LABORE
+     ---------------------------------------------------- */
   body.printing-prolabore {
     width: 210mm !important;
     min-height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
-  }
-
-  /* Quando estiver imprimindo pró-labore, esconde todos os filhos diretos do body, exceto o relatório */
-  body.printing-prolabore > * {
-    display: none !important;
   }
 
   body.printing-prolabore > #prolabore-print-report {
@@ -1789,7 +1885,6 @@ a {
     font-size: 8px;
   }
 
-  /* Larguras proporcionais para colunas das tabelas */
   .expenses-table col:nth-child(1) { width: 11%; }
   .expenses-table col:nth-child(2) { width: 11%; }
   .expenses-table col:nth-child(3) { width: 16%; }
@@ -1805,5 +1900,6 @@ a {
   .receivables-table col:nth-child(5) { width: 11%; }
   .receivables-table col:nth-child(6) { width: 10%; }
 }
+
 
 

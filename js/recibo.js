@@ -765,19 +765,7 @@ async function handlePrint() {
     const ok = await testReceiptFitting();
     if (!ok) return;
     
-    const printArea = document.getElementById('print-area');
-    const originalParent = printArea.parentNode;
-    const originalSibling = printArea.nextSibling;
-    
-    document.body.appendChild(printArea);
     window.print();
-    
-    if (originalSibling) {
-        originalParent.insertBefore(printArea, originalSibling);
-    } else {
-        originalParent.appendChild(printArea);
-    }
-    
     setTimeout(clearPrintFitting, 1000);
 }
 
@@ -790,19 +778,7 @@ async function handlePDF() {
     const ok = await testReceiptFitting();
     if (!ok) return;
     
-    const printArea = document.getElementById('print-area');
-    const originalParent = printArea.parentNode;
-    const originalSibling = printArea.nextSibling;
-    
-    document.body.appendChild(printArea);
     window.print();
-    
-    if (originalSibling) {
-        originalParent.insertBefore(printArea, originalSibling);
-    } else {
-        originalParent.appendChild(printArea);
-    }
-    
     setTimeout(clearPrintFitting, 1000);
 }
 

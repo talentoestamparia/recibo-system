@@ -684,7 +684,7 @@ function openNewCompetencyModalForSave() {
 }
 
 function clearPrintFitting() {
-    const wrapper = document.getElementById('print-area');
+    const wrapper = document.getElementById('receipt-print-area') || document.getElementById('print-area');
     if (!wrapper) return;
     wrapper.classList.remove('measuring-print');
     const via1 = wrapper.querySelector('.via-1');
@@ -702,16 +702,16 @@ function clearPrintFitting() {
 }
 
 async function testReceiptFitting() {
-    const wrapper = document.getElementById('print-area');
-    const via1 = wrapper.querySelector('.via-1');
-    const via2 = wrapper.querySelector('.via-2');
+    const wrapper = document.getElementById('receipt-print-area') || document.getElementById('print-area');
+    const via1 = wrapper ? wrapper.querySelector('.via-1') : null;
+    const via2 = wrapper ? wrapper.querySelector('.via-2') : null;
     
     if (!via1 || !via2) return true;
     
     clearPrintFitting();
     
     const measuringContainer = document.createElement('div');
-    measuringContainer.id = 'print-area';
+    measuringContainer.id = 'receipt-print-area';
     measuringContainer.className = 'measuring-print';
     
     const clone = via1.cloneNode(true);

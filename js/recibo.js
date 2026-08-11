@@ -793,20 +793,304 @@ function showPrintTip() {
     }, 10000);
 }
 
-export function openReceiptPrint() {
+export function printReceipt() {
     console.log('[PRINT] acionado');
+    const receiptArea = document.getElementById('receipt-print-area') || document.getElementById('print-area');
+
+    if (!receiptArea) {
+        console.error('[PRINT] Área do recibo não encontrada');
+        return;
+    }
+
+    // Exibe dica sutil na interface
     showPrintTip();
-    window.print();
+
+    // Cria clone limpo removendo botões e controles interativos
+    const clone = receiptArea.cloneNode(true);
+    clone.querySelectorAll('.no-print, button, .add-row-btn, .row-delete-btn, .recurrent-indicator, .recurrent-indicator-variable').forEach(el => el.remove());
+
+    const cleanHtml = clone.innerHTML;
+
+    // Remove qualquer iframe de impressão anterior
+    const oldIframe = document.getElementById('receipt-print-iframe');
+    if (oldIframe) oldIframe.remove();
+
+    const iframe = document.createElement('iframe');
+    iframe.id = 'receipt-print-iframe';
+    iframe.style.position = 'fixed';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
+
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+    doc.open();
+    doc.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Recibo</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 6mm;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background: #ffffff;
+      color: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .receipt-print-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 5mm;
+      width: 100%;
+      align-items: start;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .receipt {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-width: 0;
+      padding: 2mm 3mm;
+      box-sizing: border-box;
+      background: #ffffff;
+      font-size: 10.5px;
+      line-height: 1.2;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .receipt.via-2 {
+      border-left: 1px dashed #666;
+      padding-left: 4mm;
+    }
+
+    .receipt-title {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2mm;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #000000;
+    }
+
+    .receipt-header-info {
+      margin-bottom: 2.5mm;
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .info-line {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0.6mm;
+    }
+
+    .info-label {
+      font-weight: 700;
+      color: #000000;
+    }
+
+    .info-val {
+      color: #000000;
+    }
+
+    .receipt-body {
+      border: 1px solid #000000;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      margin-bottom: 2.5mm;
+    }
+
+    .receipt-body-title {
+      background-color: #e5e7eb;
+      border-bottom: 1px solid #000000;
+      font-weight: 700;
+      text-align: center;
+      padding: 1mm 2mm;
+      font-size: 10px;
+    }
+
+    .receipt-section-header {
+      border-bottom: 1px solid #000000;
+      font-weight: 700;
+      padding: 0.8mm 2mm;
+      font-size: 9.5px;
+      background-color: #f9fafb;
+    }
+
+    .receipt-rows-container {
+      padding: 1mm 2mm;
+    }
+
+    .receipt-row {
+      display: grid;
+      grid-template-columns: auto minmax(10px, 1fr) auto;
+      align-items: center;
+      column-gap: 4px;
+      width: 100%;
+      white-space: nowrap;
+      padding: 0.5mm 0;
+      font-size: 10px;
+      line-height: 1.15;
+    }
+
+    .row-description {
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .row-dots {
+      display: block;
+      min-width: 8px;
+      border-bottom: 1px dotted #000000;
+      height: 0;
+      margin-bottom: 2px;
+    }
+
+    .row-value-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .receipt-total-row {
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #000000;
+      background-color: #f3f4f6;
+      padding: 1mm 2mm;
+      font-weight: 700;
+      font-size: 10.5px;
+      margin-top: auto;
+    }
+
+    .total-label {
+      font-weight: 700;
+    }
+
+    .total-dots {
+      flex: 1;
+      margin: 0 4px;
+      border-bottom: 1px dotted #000000;
+      height: 0;
+      margin-bottom: 2px;
+    }
+
+    .total-val {
+      font-weight: 700;
+    }
+
+    .receipt-footer {
+      font-size: 9.5px;
+      line-height: 1.25;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .declaration-text {
+      margin-bottom: 2mm;
+      font-size: 9.5px;
+      text-align: justify;
+    }
+
+    .declaration-val-inline {
+      font-weight: 700;
+    }
+
+    .footer-bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: end;
+      gap: 6mm;
+      margin-top: 2.5mm;
+    }
+
+    .city-date-wrapper {
+      text-align: left;
+      white-space: nowrap;
+      font-size: 9.5px;
+    }
+
+    .signature-wrapper {
+      text-align: center;
+    }
+
+    .signature-line {
+      border-top: 1px solid #000000;
+      margin-bottom: 1.5mm;
+    }
+
+    .signature-name {
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .no-print, button, .add-row-btn, .row-delete-btn, .recurrent-indicator, .recurrent-indicator-variable {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt-print-pair">
+    ${cleanHtml}
+  </div>
+</body>
+</html>`);
+    doc.close();
+
+    setTimeout(() => {
+        try {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        } catch (err) {
+            console.error('[PRINT] Erro ao disparar impressão no iframe:', err);
+        }
+        setTimeout(() => {
+            if (iframe.parentElement) iframe.remove();
+        }, 2000);
+    }, 250);
+}
+
+export function openReceiptPrint() {
+    printReceipt();
 }
 
 export function handlePrint(e) {
     if (e && e.preventDefault) e.preventDefault();
-    openReceiptPrint();
+    printReceipt();
 }
 
 export function handlePDF(e) {
     if (e && e.preventDefault) e.preventDefault();
-    openReceiptPrint();
+    printReceipt();
 }
 
 // Registro global após o carregamento do DOM

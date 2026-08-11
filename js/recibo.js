@@ -339,8 +339,8 @@ function setupEventListeners() {
     
     if (btnClear) btnClear.onclick = handleClear;
     if (btnSave) btnSave.onclick = handleSave;
-    if (btnPrint) btnPrint.onclick = handlePrint;
-    if (btnPdf) btnPdf.onclick = handlePDF;
+    if (btnPrint) btnPrint.onclick = printReceiptIsolated;
+    if (btnPdf) btnPdf.onclick = printReceiptIsolated;
     
     const btnDup = document.getElementById('recibo-btn-duplicate');
     if (btnDup) {
@@ -793,16 +793,18 @@ function showPrintTip() {
     }, 10000);
 }
 
-export function printReceipt() {
-    console.log('[PRINT] acionado');
+export function printReceiptIsolated(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    console.log('[PRINT] printReceiptIsolated acionado');
+
     const receiptArea = document.getElementById('receipt-print-area') || document.getElementById('print-area');
 
     if (!receiptArea) {
-        console.error('[PRINT] Área do recibo não encontrada');
+        console.error('[PRINT] receipt-print-area não encontrado');
         return;
     }
 
-    // Exibe dica sutil na interface
+    // Exibe dica sutil na interface do sistema
     showPrintTip();
 
     // Cria clone limpo removendo botões e controles interativos
@@ -815,16 +817,15 @@ export function printReceipt() {
     const oldIframe = document.getElementById('receipt-print-iframe');
     if (oldIframe) oldIframe.remove();
 
+    // Cria iframe off-screen com dimensões renderizáveis para garantir foco de impressão
     const iframe = document.createElement('iframe');
     iframe.id = 'receipt-print-iframe';
     iframe.style.position = 'fixed';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.opacity = '0';
-    iframe.style.pointerEvents = 'none';
+    iframe.style.left = '-9999px';
+    iframe.style.top = '-9999px';
+    iframe.style.width = '1024px';
+    iframe.style.height = '768px';
+    iframe.style.border = 'none';
 
     document.body.appendChild(iframe);
 
@@ -1075,22 +1076,25 @@ export function printReceipt() {
         }
         setTimeout(() => {
             if (iframe.parentElement) iframe.remove();
-        }, 2000);
-    }, 250);
+        }, 3000);
+    }, 300);
 }
 
-export function openReceiptPrint() {
-    printReceipt();
+// Aliases para garantir compatibilidade
+export function printReceipt(e) {
+    printReceiptIsolated(e);
+}
+
+export function openReceiptPrint(e) {
+    printReceiptIsolated(e);
 }
 
 export function handlePrint(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    printReceipt();
+    printReceiptIsolated(e);
 }
 
 export function handlePDF(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    printReceipt();
+    printReceiptIsolated(e);
 }
 
 // Registro global após o carregamento do DOM
@@ -1102,10 +1106,10 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[PRINT] botão pdf:', !!pdfBtn);
     
     if (printBtn) {
-        printBtn.addEventListener('click', handlePrint);
+        printBtn.onclick = printReceiptIsolated;
     }
     if (pdfBtn) {
-        pdfBtn.addEventListener('click', handlePDF);
+        pdfBtn.onclick = printReceiptIsolated;
     }
 });
 

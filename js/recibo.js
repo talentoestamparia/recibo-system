@@ -839,7 +839,7 @@ export function printReceiptIsolated(e) {
   <title>Recibo</title>
   <style>
     @page {
-      size: A4 landscape;
+      size: 297mm 210mm;
       margin: 8mm;
     }
 
@@ -850,208 +850,218 @@ export function printReceiptIsolated(e) {
     }
 
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      background: #ffffff;
-      color: #000000;
+      width: 281mm !important;
+      min-width: 281mm !important;
+      max-width: 281mm !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+      color: #000000 !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
+    #receipt-print-area,
+    .print-page,
     .receipt-print-pair {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 8mm;
-      width: 100%;
-      align-items: start;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      width: 281mm !important;
+      max-width: 281mm !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      column-gap: 8mm !important;
+      align-items: start !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
     }
 
     .receipt {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      min-width: 0;
-      padding: 3mm 4mm;
-      box-sizing: border-box;
-      background: #ffffff;
-      font-size: 11.5px;
-      line-height: 1.25;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 136.5mm !important;
+      max-width: 136.5mm !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 4mm 5mm !important;
+      box-sizing: border-box !important;
+      background: #ffffff !important;
+      font-size: 11.5px !important;
+      line-height: 1.25 !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
     }
 
     .receipt.via-2 {
-      border-left: 1px dashed #555;
-      padding-left: 5mm;
+      border-left: 1px dashed #555 !important;
+      padding-left: 5mm !important;
     }
 
     .receipt-title {
-      font-size: 18px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 2.5mm;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #000000;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+      margin-bottom: 2.5mm !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      color: #000000 !important;
     }
 
     .receipt-header-info {
-      margin-bottom: 3mm;
-      font-size: 11px;
-      line-height: 1.3;
+      margin-bottom: 3mm !important;
+      font-size: 11px !important;
+      line-height: 1.3 !important;
     }
 
     .info-line {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 0.8mm;
+      display: flex !important;
+      gap: 4px !important;
+      margin-bottom: 0.8mm !important;
     }
 
     .info-label {
-      font-weight: 700;
-      color: #000000;
+      font-weight: 700 !important;
+      color: #000000 !important;
     }
 
     .info-val {
-      color: #000000;
+      color: #000000 !important;
     }
 
     .receipt-body {
-      border: 1px solid #000000;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      margin-bottom: 3mm;
+      border: 1px solid #000000 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex-grow: 1 !important;
+      margin-bottom: 3mm !important;
     }
 
     .receipt-body-title {
-      background-color: #e5e7eb;
-      border-bottom: 1px solid #000000;
-      font-weight: 700;
-      text-align: center;
-      padding: 1.2mm 2.5mm;
-      font-size: 11px;
+      background-color: #e5e7eb !important;
+      border-bottom: 1px solid #000000 !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+      padding: 1.2mm 2.5mm !important;
+      font-size: 11px !important;
     }
 
     .receipt-section-header {
-      border-bottom: 1px solid #000000;
-      font-weight: 700;
-      padding: 1mm 2.5mm;
-      font-size: 10.5px;
-      background-color: #f9fafb;
+      border-bottom: 1px solid #000000 !important;
+      font-weight: 700 !important;
+      padding: 1mm 2.5mm !important;
+      font-size: 10.5px !important;
+      background-color: #f9fafb !important;
     }
 
     .receipt-rows-container {
-      padding: 1.2mm 2.5mm;
+      padding: 1.2mm 2.5mm !important;
     }
 
     .receipt-row {
-      display: grid;
-      grid-template-columns: auto minmax(15px, 1fr) auto;
-      align-items: center;
-      column-gap: 5px;
-      width: 100%;
-      white-space: nowrap;
-      padding: 0.6mm 0;
-      font-size: 11px;
-      line-height: 1.2;
+      display: grid !important;
+      grid-template-columns: auto minmax(15px, 1fr) auto !important;
+      align-items: center !important;
+      column-gap: 5px !important;
+      width: 100% !important;
+      white-space: nowrap !important;
+      padding: 0.6mm 0 !important;
+      font-size: 11px !important;
+      line-height: 1.2 !important;
     }
 
     .row-description {
-      min-width: 0;
-      white-space: nowrap;
+      min-width: 0 !important;
+      white-space: nowrap !important;
     }
 
     .row-dots {
-      display: block;
-      min-width: 10px;
-      border-bottom: 1px dotted #000000;
-      height: 0;
-      margin-bottom: 2px;
+      display: block !important;
+      min-width: 10px !important;
+      border-bottom: 1px dotted #000000 !important;
+      height: 0 !important;
+      margin-bottom: 2px !important;
     }
 
     .row-value-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      white-space: nowrap;
-      font-weight: 700;
+      display: flex !important;
+      align-items: center !important;
+      gap: 2px !important;
+      white-space: nowrap !important;
+      font-weight: 700 !important;
     }
 
     .receipt-total-row {
-      display: flex;
-      align-items: center;
-      border-top: 1px solid #000000;
-      background-color: #f3f4f6;
-      padding: 1.2mm 2.5mm;
-      font-weight: 700;
-      font-size: 11.5px;
-      margin-top: auto;
+      display: flex !important;
+      align-items: center !important;
+      border-top: 1px solid #000000 !important;
+      background-color: #f3f4f6 !important;
+      padding: 1.2mm 2.5mm !important;
+      font-weight: 700 !important;
+      font-size: 11.5px !important;
+      margin-top: auto !important;
     }
 
     .total-label {
-      font-weight: 700;
+      font-weight: 700 !important;
     }
 
     .total-dots {
-      flex: 1;
-      margin: 0 4px;
-      border-bottom: 1px dotted #000000;
-      height: 0;
-      margin-bottom: 2px;
+      flex: 1 !important;
+      margin: 0 4px !important;
+      border-bottom: 1px dotted #000000 !important;
+      height: 0 !important;
+      margin-bottom: 2px !important;
     }
 
     .total-val {
-      font-weight: 700;
+      font-weight: 700 !important;
     }
 
     .receipt-footer {
-      font-size: 10.5px;
-      line-height: 1.3;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      font-size: 10.5px !important;
+      line-height: 1.3 !important;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
     }
 
     .declaration-text {
-      margin-bottom: 2.5mm;
-      font-size: 10.5px;
-      text-align: justify;
+      margin-bottom: 2.5mm !important;
+      font-size: 10.5px !important;
+      text-align: justify !important;
     }
 
     .declaration-val-inline {
-      font-weight: 700;
+      font-weight: 700 !important;
     }
 
     .footer-bottom-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: end;
-      gap: 8mm;
-      margin-top: 3mm;
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      align-items: end !important;
+      gap: 8mm !important;
+      margin-top: 3mm !important;
     }
 
     .city-date-wrapper {
-      text-align: left;
-      white-space: nowrap;
-      font-size: 10.5px;
+      text-align: left !important;
+      white-space: nowrap !important;
+      font-size: 10.5px !important;
     }
 
     .signature-wrapper {
-      text-align: center;
+      text-align: center !important;
     }
 
     .signature-line {
-      border-top: 1px solid #000000;
-      margin-bottom: 1.5mm;
+      border-top: 1px solid #000000 !important;
+      margin-bottom: 1.5mm !important;
     }
 
     .signature-name {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 10px !important;
+      font-weight: 700 !important;
     }
 
     .no-print, button, .add-row-btn, .row-delete-btn, .recurrent-indicator, .recurrent-indicator-variable {
@@ -1067,17 +1077,26 @@ export function printReceiptIsolated(e) {
 </html>`);
     doc.close();
 
-    setTimeout(() => {
-        try {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        } catch (err) {
-            console.error('[PRINT] Erro ao disparar impressão no iframe:', err);
-        }
-        setTimeout(() => {
-            if (iframe.parentElement) iframe.remove();
-        }, 3000);
-    }, 300);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            try {
+                if (iframe.contentDocument && iframe.contentDocument.body) {
+                    console.log('[PRINT] largura iframe body:', iframe.contentDocument.body.getBoundingClientRect().width);
+                }
+            } catch (err) {}
+
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (err) {
+                console.error('[PRINT] Erro ao disparar impressão no iframe:', err);
+            }
+
+            setTimeout(() => {
+                if (iframe.parentElement) iframe.remove();
+            }, 3000);
+        });
+    });
 }
 
 // Aliases para garantir compatibilidade

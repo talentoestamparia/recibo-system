@@ -168,7 +168,9 @@ function setupListeners() {
         };
     }
 
-    bindProlaborePdfButton();
+    if (btnPdf) {
+        btnPdf.addEventListener('click', printProlaboreIsolated);
+    }
 
     // Modal Transações
     if (transTypeSelect) {
@@ -227,23 +229,7 @@ function setupListeners() {
         partnerCancelEdit.onclick = () => {
             resetPartnerForm();
         };
-    bindProlaborePdfButton();
-}
-
-/**
- * Vincula o clique do botão PDF de Pró-labore
- */
-function bindProlaborePdfButton() {
-    const btn = document.getElementById('btn-prolabore-pdf');
-    if (!btn) {
-        console.error('[PROLABORE PDF] botão não encontrado');
-        return;
     }
-    btn.onclick = (event) => {
-        event.preventDefault();
-        console.log('[PROLABORE PDF] clique recebido');
-        printProlaboreIsolated();
-    };
 }
 
 /**
@@ -843,6 +829,7 @@ function getHumanMonthYear(monthStr) {
  */
 export function printProlaboreIsolated(e) {
     if (e && e.preventDefault) e.preventDefault();
+    console.log('[PRINT] printProlaboreIsolated acionado');
 
     const partnerSelect = document.getElementById('prolabore-partner-select');
     const monthInput = document.getElementById('prolabore-month-select');
@@ -1227,8 +1214,8 @@ export function printProlaboreIsolated(e) {
             try {
                 iframe.contentWindow.focus();
                 iframe.contentWindow.print();
-            } catch (error) {
-                console.error('[PROLABORE PDF ERROR]', error?.message || error);
+            } catch (err) {
+                console.error('[PRINT] Erro ao disparar impressão do Pró-labore no iframe:', err);
             }
             setTimeout(() => {
                 if (iframe.parentElement) iframe.remove();

@@ -168,10 +168,8 @@ function setupListeners() {
         };
     }
 
-    const btnPdf = document.getElementById('btn-prolabore-pdf');
-    console.log('Botão PDF encontrado:', btnPdf);
     if (btnPdf) {
-        btnPdf.addEventListener('click', handleProlaborePrint);
+        btnPdf.addEventListener('click', printProlaboreIsolated);
     }
 
     // Modal Transações
@@ -827,10 +825,12 @@ function getHumanMonthYear(monthStr) {
 }
 
 /**
- * Prepara o HTML e dispara a impressão do relatório em PDF
+ * Prepara o HTML e dispara a impressão do relatório em PDF usando iframe isolado
  */
-function handleProlaborePrint() {
-    console.log('Clique em Salvar em PDF');
+export function printProlaboreIsolated(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    console.log('[PRINT] printProlaboreIsolated acionado');
+
     const partnerSelect = document.getElementById('prolabore-partner-select');
     const monthInput = document.getElementById('prolabore-month-select');
 
@@ -844,19 +844,10 @@ function handleProlaborePrint() {
         return;
     }
 
-    const partnerName = partnerSelect.options[partnerSelect.selectedIndex]?.text?.trim() || 'Socio';
+    const partnerName = partnerSelect.options[partnerSelect.selectedIndex]?.text?.trim()?.replace(/\s*\(inativo\)\s*/i, '') || 'Sócio';
     const referenceMonth = monthInput.value || '';
-
-    const safePartnerName = partnerName
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-zA-Z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, '');
-
-    const safeMonth = referenceMonth.replace('-', '_');
-    const originalTitle = document.title;
-
-    document.title = `Prolabore_${safePartnerName}_${safeMonth}`;
+    const competencyLabel = getHumanMonthYear(referenceMonth);
+    const todayStr = new Date().toLocaleDateString('pt-BR');
 
     // Filtrar e calcular diretamente das variáveis de estado carregadas (filtrando transações de Pró-labore principal)
     const expenses = currentTransactions.filter(item => (item.type === 'expense' || item.type === 'tax' || item.type === 'withdraw') && !isProlaboreTransaction(item));
@@ -897,7 +888,7 @@ function handleProlaborePrint() {
                     <td>${typeLabel}</td>
                     <td>${item.category || '-'}</td>
                     <td>${item.supplier_name || '-'}</td>
-                    <td>${item.description || '-'}</td>
+                    <td style="word-break: break-word; overflow-wrap: anywhere;">${item.description || '-'}</td>
                     <td>${installmentText}</td>
                     <td style="font-weight: 600; color: #ef4444; text-align: right;">${formatCurrency(item.amount)}</td>
                 </tr>
@@ -918,159 +909,317 @@ function handleProlaborePrint() {
                     <td>${dateStr}</td>
                     <td>${typeLabel}</td>
                     <td>${item.category || '-'}</td>
-                    <td>${item.description || '-'}</td>
+                    <td style="word-break: break-word; overflow-wrap: anywhere;">${item.description || '-'}</td>
                     <td style="font-weight: 600; color: #10b981; text-align: right;">${formatCurrency(item.amount)}</td>
                 </tr>
             `;
         }).join('');
     }
 
-    const competencyLabel = getHumanMonthYear(referenceMonth);
-    const todayStr = new Date().toLocaleDateString('pt-BR');
+    // Remover qualquer iframe anterior do Pró-labore
+    const oldIframe = document.getElementById('prolabore-print-iframe');
+    if (oldIframe) oldIframe.remove();
 
-    const printReportContainer = document.getElementById('prolabore-print-report');
-    if (printReportContainer) {
-        printReportContainer.innerHTML = `
-            <!-- CABEÇALHO DO RELATÓRIO EM DUAS COLUNAS -->
-            <div class="print-header">
-                <div class="print-header-left">
-                    <h1 style="font-family: Outfit, Arial, sans-serif; font-weight: 700; margin: 0 0 2mm; font-size: 16px;">ESTAMPARIA JL LTDA - ME</h1>
-                    <p style="margin: 0;">CNPJ: 25.140.946/0001-84</p>
-                    <p style="margin: 0;">Sarandi-PR</p>
-                </div>
-                <div class="print-header-right">
-                    <h1 style="font-family: Outfit, Arial, sans-serif; font-weight: 700; margin: 0 0 2mm; font-size: 16px;">RELATÓRIO DE PRÓ-LABORE</h1>
-                    <p style="margin: 0;"><strong>Sócio:</strong> <span>${partnerName.replace(/\s*\(inativo\)\s*/i, '')}</span></p>
-                    <p style="margin: 0;"><strong>Competência:</strong> <span>${competencyLabel}</span></p>
-                    <p style="margin: 0;"><strong>Data de Emissão:</strong> <span>${todayStr}</span></p>
-                </div>
-            </div>
+    // Criar iframe off-screen
+    const iframe = document.createElement('iframe');
+    iframe.id = 'prolabore-print-iframe';
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-9999px';
+    iframe.style.top = '-9999px';
+    iframe.style.width = '1024px';
+    iframe.style.height = '768px';
+    iframe.style.border = 'none';
 
-            <!-- RESUMO FINANCEIRO EM TABELA COMPACTA -->
-            <div class="print-section financial-summary">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align: left;">Descrição</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Valor do pró-labore</td>
-                            <td>${formatCurrency(grossProlabore)}</td>
-                        </tr>
-                        <tr>
-                            <td>Receitas extras</td>
-                            <td>${formatCurrency(totalExtraIncome)}</td>
-                        </tr>
-                        <tr>
-                            <td>Descontos</td>
-                            <td>${formatCurrency(totalDiscounts)}</td>
-                        </tr>
-                        <tr class="net-row">
-                            <td>Valor total a receber</td>
-                            <td>${formatCurrency(netReceivable)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p style="font-size: 7.5px; color: #555; font-style: italic; margin-top: 1mm; margin-bottom: 2mm;">
-                    Valor total a receber = Pró-labore + Receitas extras - Descontos
-                </p>
-            </div>
+    document.body.appendChild(iframe);
 
-            <!-- TABELA GASTOS E DESPESAS -->
-            <div class="print-section">
-                <h2>Despesas e Descontos</h2>
-                <table class="expenses-table">
-                    <colgroup>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Tipo</th>
-                            <th>Categoria</th>
-                            <th>Fornecedor</th>
-                            <th>Descrição</th>
-                            <th>Parcela</th>
-                            <th style="text-align: right;">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${expensesRowsHtml}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="6" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de descontos</td>
-                            <td style="text-align: right; font-weight: bold; color: #ef4444;">${formatCurrency(totalDiscounts)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <!-- TABELA RECEITAS EXTRAS -->
-            <div class="print-section">
-                <h2>Receitas Extras</h2>
-                <table class="receivables-table">
-                    <colgroup>
-                        <col style="width: 15%;">
-                        <col style="width: 15%;">
-                        <col style="width: 20%;">
-                        <col style="width: 35%;">
-                        <col style="width: 15%;">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Tipo</th>
-                            <th>Categoria</th>
-                            <th>Descrição</th>
-                            <th style="text-align: right;">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${receivablesRowsHtml}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" style="text-align: right; font-weight: bold; text-transform: uppercase;">Total de receitas extras</td>
-                            <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalExtraIncome)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <!-- RODAPÉ SIMPLES -->
-            <div class="print-footer">
-                <div>ESTAMPARIA JL LTDA - ME | CNPJ: 25.140.946/0001-84</div>
-                <div>Emissão em: ${todayStr} ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
-            </div>
-        `;
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Pró-labore</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm;
     }
 
-    // Ativar a classe de impressão de Pró-labore no body
-    document.body.classList.add('printing-prolabore');
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    const restoreTitle = () => {
-        document.title = originalTitle;
-        document.body.classList.remove('printing-prolabore');
-        if (printReportContainer) printReportContainer.innerHTML = '';
-        window.removeEventListener('afterprint', restoreTitle);
-    };
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #000000;
+      font-family: Arial, sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
 
-    window.addEventListener('afterprint', restoreTitle);
+    .prolabore-print-report {
+      width: 100%;
+      max-width: 190mm;
+      margin: 0 auto;
+    }
 
-    // Garantir renderização completa dos frames antes de abrir janela de impressão
+    .print-header {
+      display: grid;
+      grid-template-columns: 1.25fr 1.75fr;
+      gap: 10mm;
+      align-items: start;
+      border-bottom: 2px solid #000;
+      padding-bottom: 4mm;
+      margin-bottom: 5mm;
+    }
+
+    .print-header-left h1,
+    .print-header-right h1 {
+      margin: 0 0 2mm;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .print-header-right {
+      text-align: right;
+    }
+
+    .print-header p {
+      margin: 0;
+      font-size: 9.5px;
+      line-height: 1.4;
+    }
+
+    .print-section {
+      margin-bottom: 5mm;
+    }
+
+    .print-section h2 {
+      margin: 0 0 2mm;
+      font-size: 12px;
+      font-weight: 700;
+      border-bottom: 1px solid #aaa;
+      padding-bottom: 1mm;
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-bottom: 1.5mm;
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 1.8mm;
+      font-size: 9px;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    th {
+      background: #e5e7eb;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    td:last-child, th:last-child {
+      text-align: right;
+    }
+
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    .financial-summary th {
+      background: #e5e7eb;
+    }
+
+    .financial-summary .net-row {
+      font-weight: 700;
+      font-size: 11px;
+      background: #f3f4f6;
+    }
+
+    .financial-summary .net-row td {
+      border-top: 2px solid #000;
+    }
+
+    .expenses-table col:nth-child(1) { width: 12%; }
+    .expenses-table col:nth-child(2) { width: 12%; }
+    .expenses-table col:nth-child(3) { width: 16%; }
+    .expenses-table col:nth-child(4) { width: 18%; }
+    .expenses-table col:nth-child(5) { width: 25%; }
+    .expenses-table col:nth-child(6) { width: 8%; }
+    .expenses-table col:nth-child(7) { width: 9%; }
+
+    .receivables-table col:nth-child(1) { width: 15%; }
+    .receivables-table col:nth-child(2) { width: 15%; }
+    .receivables-table col:nth-child(3) { width: 20%; }
+    .receivables-table col:nth-child(4) { width: 35%; }
+    .receivables-table col:nth-child(5) { width: 15%; }
+
+    .print-footer {
+      margin-top: 8mm;
+      padding-top: 3mm;
+      border-top: 1px solid #000;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="prolabore-print-report">
+    <!-- CABEÇALHO -->
+    <div class="print-header">
+        <div class="print-header-left">
+            <h1>ESTAMPARIA JL LTDA - ME</h1>
+            <p>CNPJ: 25.140.946/0001-84</p>
+            <p>Sarandi-PR</p>
+        </div>
+        <div class="print-header-right">
+            <h1>RELATÓRIO DE PRÓ-LABORE</h1>
+            <p><strong>Sócio:</strong> <span>${partnerName}</span></p>
+            <p><strong>Competência:</strong> <span>${competencyLabel}</span></p>
+            <p><strong>Data de emissão:</strong> <span>${todayStr}</span></p>
+        </div>
+    </div>
+
+    <!-- RESUMO FINANCEIRO -->
+    <div class="print-section financial-summary">
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: left;">Descrição</th>
+                    <th style="text-align: right;">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Valor do Pró-labore</td>
+                    <td style="text-align: right;">${formatCurrency(grossProlabore)}</td>
+                </tr>
+                <tr>
+                    <td>Receitas Extras</td>
+                    <td style="text-align: right;">${formatCurrency(totalExtraIncome)}</td>
+                </tr>
+                <tr>
+                    <td>Descontos</td>
+                    <td style="text-align: right;">${formatCurrency(totalDiscounts)}</td>
+                </tr>
+                <tr class="net-row">
+                    <td>Valor Líquido a Receber</td>
+                    <td style="text-align: right;">${formatCurrency(netReceivable)}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 7.5px; color: #555; font-style: italic; margin-top: 1.5mm;">
+            Valor Líquido a Receber = Pró-labore + Receitas Extras - Descontos
+        </p>
+    </div>
+
+    <!-- TABELA DESPESAS E DESCONTOS -->
+    <div class="print-section">
+        <h2>Despesas e Descontos</h2>
+        <table class="expenses-table">
+            <colgroup>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Fornecedor</th>
+                    <th>Descrição</th>
+                    <th>Parcela</th>
+                    <th style="text-align: right;">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${expensesRowsHtml}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" style="text-align: right; font-weight: bold; text-transform: uppercase;">TOTAL DE DESCONTOS</td>
+                    <td style="text-align: right; font-weight: bold; color: #ef4444;">${formatCurrency(totalDiscounts)}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- TABELA RECEITAS EXTRAS -->
+    <div class="print-section">
+        <h2>Receitas Extras</h2>
+        <table class="receivables-table">
+            <colgroup>
+                <col>
+                <col>
+                <col>
+                <col>
+                <col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Descrição</th>
+                    <th style="text-align: right;">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${receivablesRowsHtml}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right; font-weight: bold; text-transform: uppercase;">TOTAL DE RECEITAS EXTRAS</td>
+                    <td style="text-align: right; font-weight: bold; color: #10b981;">${formatCurrency(totalExtraIncome)}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- RODAPÉ -->
+    <div class="print-footer">
+        <div>ESTAMPARIA JL LTDA - ME | CNPJ: 25.140.946/0001-84</div>
+        <div>Emissão em: ${todayStr} ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
+    </div>
+  </div>
+</body>
+</html>`);
+    doc.close();
+
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            window.print();
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (err) {
+                console.error('[PRINT] Erro ao disparar impressão do Pró-labore no iframe:', err);
+            }
+            setTimeout(() => {
+                if (iframe.parentElement) iframe.remove();
+            }, 3000);
         });
     });
 }

@@ -1,8 +1,8 @@
 /**
  * Controlador de Interface para o Módulo de Pró-labore (Suporte Multi-sócio)
  */
-import { formatCurrency, formatDateBR } from './utils.js?v=12';
-import { supabase } from './supabase.js?v=12';
+import { formatCurrency, formatDateBR } from './utils.js?v=13';
+import { supabase } from './supabase.js?v=13';
 import {
     getOrCreateDefaultPartners,
     getProlaborePartners,
@@ -14,7 +14,7 @@ import {
     saveProlaboreTransaction,
     deleteProlaboreTransaction,
     copyPreviousMonthTransactions
-} from './db_prolabore.js?v=12';
+} from './db_prolabore.js?v=13';
 
 let currentPartnerId = null;
 let currentPeriod = null;

@@ -1,16 +1,16 @@
 /**
  * Sistema de Recibos de Pagamento - SPA App Core
  */
-import * as db from './db.js?v=12';
-import { applyThemeSettings, initSettings } from './configuracoes.js?v=12';
-import { initDashboard, checkExcelImport } from './dashboard.js?v=12';
-import { initEmployees } from './funcionarios.js?v=12';
-import { initHistory } from './historico.js?v=12';
-import { initVacations } from './ferias.js?v=12';
-import { initReceipt } from './recibo.js?v=12';
-import { initProlabore } from './prolabore.js?v=12';
+import * as db from './db.js?v=13';
+import { applyThemeSettings, initSettings } from './configuracoes.js?v=13';
+import { initDashboard, checkExcelImport } from './dashboard.js?v=13';
+import { initEmployees } from './funcionarios.js?v=13';
+import { initHistory } from './historico.js?v=13';
+import { initVacations } from './ferias.js?v=13';
+import { initReceipt } from './recibo.js?v=13';
+import { initProlabore } from './prolabore.js?v=13';
 
-import { supabase, login, logout, getSession, onAuthStateChange } from './supabase.js?v=12';
+import { supabase, login, logout, getSession, onAuthStateChange } from './supabase.js?v=13';
 
 // Mapeamento de inicializadores de view
 const VIEW_INITIALIZERS = {
@@ -190,7 +190,7 @@ async function initializeAuthentication() {
             spinner.classList.remove('d-none');
             submitBtn.disabled = true;
             
-            const { resetPassword } = await import('./supabase.js?v=12');
+            const { resetPassword } = await import('./supabase.js?v=13');
             const { error } = await resetPassword(email);
             
             spinner.classList.add('d-none');
@@ -236,7 +236,7 @@ async function initializeAuthentication() {
             spinner.classList.remove('d-none');
             submitBtn.disabled = true;
             
-            const { updatePassword } = await import('./supabase.js?v=12');
+            const { updatePassword } = await import('./supabase.js?v=13');
             const { error } = await updatePassword(password);
             
             spinner.classList.add('d-none');

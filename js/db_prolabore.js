@@ -1,7 +1,7 @@
 /**
  * Camada de Acesso a Dados do Supabase para o Módulo de Pró-labore (Multi-sócio)
  */
-import { supabase } from './supabase.js?v=12';
+import { supabase } from './supabase.js?v=13';
 
 /**
  * Cria ou busca os sócios padrão iniciais se a lista estiver vazia

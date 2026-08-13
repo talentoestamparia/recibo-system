@@ -20,8 +20,8 @@
  *        return data;
  *    }
  */
-import { supabase } from './supabase.js?v=11';
-import * as remoteDb from './db_supabase.js?v=11';
+import { supabase } from './supabase.js?v=13';
+import * as remoteDb from './db_supabase.js?v=13';
 
 // Chaves do LocalStorage
 const KEYS = {

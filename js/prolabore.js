@@ -36,8 +36,15 @@ export async function initProlabore() {
         // 2. Preencher select de sócios
         renderPartnersDropdown();
 
-        // 3. Setar sócio inicial se não houver selecionado
-        if (!partnerSelect.value && allPartners.length > 0) {
+        // 3. Setar sócio inicial se não houver selecionado (ou se vier do Histórico)
+        const paramPartnerId = sessionStorage.getItem('selectedProlaborePartner');
+        const paramMonth = sessionStorage.getItem('selectedProlaboreMonth');
+        sessionStorage.removeItem('selectedProlaborePartner');
+        sessionStorage.removeItem('selectedProlaboreMonth');
+
+        if (paramPartnerId) {
+            partnerSelect.value = paramPartnerId;
+        } else if (!partnerSelect.value && allPartners.length > 0) {
             // Preferir o primeiro ativo
             const firstActive = allPartners.find(p => p.is_active);
             partnerSelect.value = firstActive ? firstActive.id : allPartners[0].id;
@@ -45,7 +52,9 @@ export async function initProlabore() {
         currentPartnerId = partnerSelect.value;
 
         // 4. Setar mês atual como padrão se estiver vazio
-        if (!monthSelect.value) {
+        if (paramMonth) {
+            monthSelect.value = paramMonth;
+        } else if (!monthSelect.value) {
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
